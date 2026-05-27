@@ -1,0 +1,17 @@
+# Minimal conda env for Reducing-Initial-Cache.
+# This intentionally does NOT pin torch / flash-attn / the KVzip CUDA kernel,
+# because those must be built for the target server's GPU + CUDA. Follow SETUP.md
+# after creating this env. For an exact snapshot of the source env see
+# env/jk-conda-full.yml and env/jk-pip-freeze.txt (reference only).
+#
+#   conda env create -f environment.yml      # creates env `jk`
+#   conda activate jk
+#   # then: install torch, flash-attn, KVzip kernel per SETUP.md
+name: jk
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - -r requirements.txt

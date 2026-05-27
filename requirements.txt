@@ -1,0 +1,39 @@
+# Portable pip dependencies for Reducing-Initial-Cache + KVzip.
+#
+# NOT listed here (install separately per SETUP.md -- they are server-specific):
+#   * torch            -> install the build matching the server's CUDA
+#   * flash-attn       -> must be BUILT for the server's GPU arch + torch version
+#   * tiny_api_cuda    -> KVzip's CUDA kernel, built from KVzip/csrc
+#
+# HARD pin: transformers==4.51.3 (KVzip's attention monkeypatch breaks on >=4.54).
+# Versions below match the source env `jk`; see env/jk-pip-freeze.txt for the full
+# exact freeze.
+
+transformers==4.51.3
+datasets==4.4.1
+accelerate
+huggingface-hub==0.35.1
+tokenizers==0.21.4
+safetensors==0.6.2
+sentencepiece
+protobuf==5.29.6
+
+numpy==2.3.3
+scipy==1.16.2
+scikit-learn==1.7.2
+pandas==2.3.2
+einops==0.8.2
+ninja==1.13.0
+tqdm==4.67.1
+rich==14.2.0
+matplotlib==3.10.6
+
+# evaluation metrics (NIAH / SCBench scoring)
+rouge-score
+rouge==1.0.1
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.27.3
+
+# optional: only needed for SCBench repoqa (code) tasks
+# tree-sitter==0.21.3
+# tree-sitter-languages==1.10.2

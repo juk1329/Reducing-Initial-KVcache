@@ -1,0 +1,18 @@
+# python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+build/
+dist/
+.ipynb_checkpoints/
+
+# experiment outputs (regenerable; commit with `git add -f` if you want to keep them)
+results/
+results_niah/
+results_scbench/
+
+# misc
+*.log
+.venv/
+.DS_Store
