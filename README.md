@@ -1,154 +1,255 @@
-# Reducing-Initial-Cache (RIC)
+# Reducing Initial KV Cache (RIC)
 
-**스트리밍 KV-cache 압축으로 prefill의 *peak* 메모리를 줄이는 방법.**
+**Streaming KV-cache compression that bounds the *prefill peak* by interleaving reconstruction-based eviction with the prefill itself.**
 
-KVzip / SnapKV / PyramidKV 등 기존 prefill 압축 기법은 **긴 context의 KV를 전부 만든 뒤(materialize) 압축**한다. 따라서 압축을 해도 *peak* 메모리는 full KV 그대로이고, 같은 GPU에서 감당 가능한 초기 context 길이의 상한은 baseline과 동일하다(오히려 KVzip은 scoring forward 때문에 peak가 더 높다). 이 프로젝트(논문 `paper.tex`의 방향 1)는 **prefill 도중 압축을 interleave**해서 물리적으로 저장되는 KV를 항상 budget 이하로 묶어 peak를 낮춘다. 결과적으로 12GB GPU에서 baseline보다 더 긴 초기 context를 OOM 없이 삼킬 수 있다.
+KVzip / SnapKV / PyramidKV 등 기존 prefill 압축 기법은 **긴 context의 KV를 전부 만든 뒤(materialize) 압축**한다. 그래서 압축률을 낮춰도 *peak* 메모리는 full KV 그대로이고, 같은 GPU에서 받을 수 있는 초기 context 길이의 상한은 baseline과 같다(오히려 KVzip은 scoring forward 때문에 peak가 약간 더 높다). 본 레포(`paper.tex`의 방향)는 **prefill 도중 압축을 interleave**해서 물리적으로 저장되는 KV가 항상 target budget 안에 머물도록 하고, 그 결과 prefill peak를 budget이 정한다(고정 budget이면 $L$ 무관, ratio budget이면 $O(rL)$). 같은 메커니즘을 multi-turn에도 적용해 turn 누적도 ratio $r$로 throttling한다.
 
-> 상태: **구현 완료, 아직 실행 안 함.** 모델 가중치(llama3.2 등)는 로컬에 없으며 게이트될 수 있다. 아래 명령으로 직접 실행해야 한다. 코드 정적 syntax 체크는 통과(`python -m py_compile`).
+> 상태: **구현·실험 완료.** NIAH grid (qwen3-4b / llama-3.2-3b × ctx 500/2k/8k × ratio 0~1 × 6 method) + SCBench multi-turn (summary / kv)까지 모두 돌렸고, 결과는 `results/`와 `RESULTS_NOTES.md`에 정리되어 있으며 `paper.tex`의 표/숫자에 반영되어 있다.
 
 ---
 
-## 1. 핵심 아이디어 (Method B)
+## 1. 핵심 아이디어
+
+물리 레이아웃: `[sink | committed (frozen) | working]`. context를 chunk 단위로 나누어 다음을 반복한다.
 
 ```
 for chunk in context_chunks:
-    prefill(chunk)                      # dense append (KV가 budget까지 자람)
-    score(chunk)                        # KVzip reconstruction scoring (chunk-local)
-    if physical_ctx > budget_max:       # budget 초과시에만
-        (optional) re-score cached ctx  #  --rescore
-        compact -> budget_target        #  중요한 토큰만 물리적으로 남김
+    prefill(chunk)                              # dense append -> working window
+    score(chunk)                                # KVzip reconstruction ("repeat") on the fresh chunk
+    light_drop(chunk)                           # chunk score < ratio*chunk_max 인 토큰 경량 삭제
+    if working_len >= working_max:              # heavy-prune trigger
+        rescore(working) [optional]             # working window만 repeat 프롬프트로 재스코어
+        prune working -> top intermediate_budget B_i  # commit & freeze, working 리셋
+        if committed_len > final_budget B_f:    # 누적 캡
+            reprune committed -> top B_f
+finalize: per_token (dense) or per_head (KVzip varlen) eviction
 ```
 
-- **왜 가능한가:** KVzip의 importance scoring은 *chunk-local*이다(각 chunk를 자기 자신의 "repeat" reconstruction으로 점수화). 따라서 전체 context를 만들지 않아도 갓 prefill한 chunk를 즉시 점수화할 수 있다.
-- **왜 peak가 줄어드는가:** 물리적으로 저장되는 context KV가 항상 `budget_max + chunk` 이하로 유지된다. baseline은 full KV를 만들어야 하므로 같은 길이에서 OOM.
-- **사용자의 직관 그대로:** 초기에는 거의 안 버리다가(낮은 threshold) budget을 넘기면 reconstruction을 다시 돌려 더 세게 추려낸다(`--rescore` + `budget_target`).
+- **왜 peak가 낮은가:** 물리 저장 KV가 항상 `sink + B_f + working_max + chunk` 수준으로 bound. 누적 context 길이와 무관. baseline은 full KV를 만든 뒤 압축하므로 같은 길이에서 KVzip이 OOM이어도 ours는 budget 내에서 통과.
+- **두 단계(Hybrid):** chunk마다 절대 threshold로 *경량* 삭제(`light_drop_ratio`) + working window가 trigger에 도달하면 hard top-K(`intermediate_budget`)로 *강하게* 추려 commit. 누적(committed)은 `final_budget`(=B_i의 정수배)에서만 importance 재prune.
+- **두 가지 압축 단위 (`--level`):** `per_token`(dense, 멀티턴 append 가능) / `per_head`(KVzip 방식 varlen, 최종 finalize 시 적용 → answer 단계 추가 절감).
 
-### 두 가지 압축 단위 (`--level`)
-- **`per_token` (기본, dense):** head 전체에 공유되는 토큰 position 단위로 evict. cache가 dense로 유지돼 재-scoring이 쉽고 실제 메모리가 해제된다. prefill 내내 normal attention 사용.
-- **`per_head` (KVzip 방식):** streaming prefill은 per_token과 동일(peak를 budget으로 bound)하게 돌고, **마지막에** KVzip의 per-head non-uniform eviction(`prune`)을 dense cache에 적용해 varlen으로 만든다 → answer 단계의 메모리가 더 낮아지고 head별 선택이 적용된다. KVzip의 검증된 코드(`prune`/`prepare_init`)를 그대로 재사용.
+### 중요도 신호 변종 (`paper.tex` ablation §4.4)
+- `repeat` (기본, KVzip 재구성): "repeat the chunk" 프롬프트로 점수 — 가장 안정적.
+- `predict-self` v1 ("Predict the entire context:") / v2 ("Predict the upcoming context:") — `--use_predict_prompt --predict_prompt_version {1,2}`.
+- `predict-next` (실제 다음 chunk를 query로 점수, sink/recent 보호) — `--predict_target next_chunk`.
+- `combine` (per-position max of repeat & predict) — `--combine_repeat`.
+- 모든 변종에서 **최종 compaction은 항상 repeat**: 답변용 cache는 항상 reconstruction-faithful.
 
-### 불변식 (중요)
-`_seen_tokens`는 항상 **logical** 길이(sink + 지금까지 처리한 모든 context 토큰)를 추적하고, 물리 cache 길이와 분리된다. 살아남은 key는 원래 RoPE 위치를 유지하고(중간에 구멍이 생김), 이후 chunk/query는 logical 위치로 RoPE를 받는다. 이는 **KVzip이 post-prune inference에서 이미 의존하는 근사**와 동일하다. 토큰을 재배열하지 않고 *drop*만 하므로 물리 배열 순서 = logical 순서 → flash causal attention이 그대로 성립한다.
+### Multi-turn 확장 (`paper.tex` §3.3)
+초기 context를 ratio $r$로 압축했으면 각 turn(query+answer)도 **그 turn 길이 $L_t$의 `round(turn_ratio · L_t)`**로 동적 압축. 세션 전체가 같은 비율로 균일 압축됨 → turn 누적 ≈ $r \times$ baseline. legacy "fixed cap" 모드(`turn_ratio < 0`)도 호환 유지.
+
+### Gappy-RoPE 근사
+prune된 key의 RoPE 위치는 원본 그대로 유지하고 재배열하지 않음 → 물리 배열 순서 = logical 순서 → flash causal attention 그대로 성립. KVzip이 post-prune inference에서 이미 의존하는 근사를 **prefill 도중**으로 한 단계 앞당겨 적용.
 
 ---
 
 ## 2. 코드 구조
 
 ```
-Reducing-Initial-Cache/
+Reducing-Initial-KVcache/
 ├── ric/
-│   ├── __init__.py        # KVzip을 sys.path에 주입(설치 없이 재사용)
-│   ├── mem.py             # peak 메모리 측정 + OOM-safe 러너
-│   ├── stream_cache.py    # StreamingCache(EvictCache): 압축, logical/physical 분리, finalize
-│   ├── stream_prefill.py  # streaming prefill 루프 + scoring + multi-turn
-│   └── baselines.py       # full / kvzip / streamllm / ours 디스패치
-├── args.py                # 공용 CLI
-├── run_niah.py            # 실험 1: NIAH 길이 사다리 OOM
-├── run_scbench.py         # 실험 2: SCBench short-ctx multi-turn OOM
-└── README.md
+│   ├── __init__.py        # KVzip을 sys.path에 주입 (설치 없이 import)
+│   ├── stream_cache.py    # StreamingCache (EvictCache 상속): [sink|committed|working] 레이아웃,
+│   │                      # light_drop, prune_working_to_segment, reprune_committed_to_final,
+│   │                      # reprune_turns_to_cap (legacy multi-turn cap), finalize per_token/per_head.
+│   ├── stream_prefill.py  # RICConfig + streaming_prefill (chunk loop, scoring, prune trigger) +
+│   │                      # multiturn_compress (dynamic turn_ratio + legacy fixed-cap) +
+│   │                      # derive_ric_budgets (comp_ratio -> B_f/B_i/working_max).
+│   ├── baselines.py       # full / kvzip / streamllm / ours 디스패치.
+│   ├── mem.py             # reset_peak / peak_gb / run_oom_safe (torch.cuda.max_memory_allocated).
+│   └── record.py          # capture_env / save_run (실행 JSON + jsonl 누적).
+├── args.py                # 공용 CLI (모든 RICConfig 필드 + comp_ratio + predict/combine 변종).
+├── run_niah.py            # 단일 NIAH 셀 (ctx 사다리/길이 sweep).
+├── run_niah_grid.py       # paper §4.2: NIAH per-head 그리드 (ctx × ratio × method).
+├── run_scbench.py         # paper §4.3: SCBench multi-turn (summary / kv).
+├── aggregate.py           # results/*.jsonl -> summary_*.md (paper 표 자동 생성).
+├── RESULTS_NOTES.md       # 전체 실험 staging 한국어 분석 (NIAH + Prompt study + SCBench).
+├── SETUP.md               # 새 서버에서 처음 jk env 만들 때의 단계별 함정 정리.
+└── results/
+    ├── niah_grid/         # 셀별 JSON
+    ├── scbench/           # 실행별 JSON
+    ├── niah_grid_runs.jsonl, scbench_runs.jsonl  # flat 누적 요약
+    └── summary_niah_grid.md, summary_scbench.md  # aggregate 결과 (paper 표 원천)
 ```
 
-KVzip 코드는 `../KVzip`에서 import한다(설치 X — KVzip의 pyproject가 torch 2.3/numpy 1.26으로 다운그레이드시키므로 일부러 설치하지 않음). 다른 위치면 `KVZIP_DIR` 환경변수로 지정.
+KVzip은 형제 디렉토리 `../KVzip/`에 있어야 한다(설치 X — KVzip의 pyproject가 torch/numpy를 다운그레이드시키므로 일부러 import-only). 위치가 다르면 `KVZIP_DIR` 환경변수.
 
 ---
 
-## 3. 환경
+## 3. 환경 세팅
 
-**이 레포는 KVzip을 런타임 의존성으로 import한다.** KVzip을 형제 디렉토리로 clone하거나 `KVZIP_DIR` 환경변수로 지정해야 한다.
+이 레포는 KVzip을 런타임 의존성으로 import한다. 본 실험은 **L4 24GB GPU + Ubuntu + conda env `jk`**에서 돌렸고, 환경 구축 자체는 [`SETUP.md`](SETUP.md)에 단계별로 정리되어 있다. 핵심 요약:
 
-- **새 서버에서 처음 세팅**: → **[`SETUP.md`](SETUP.md)** 를 따른다(단계별 매뉴얼 + 함정 정리). 핵심: python 3.12 + `requirements.txt`, 서버 CUDA에 맞는 torch, 서버 GPU arch로 flash-attn 빌드, `KVzip/csrc/build.py`의 arch 수정 후 커널 빌드, **transformers는 반드시 4.51.3**, KVzip은 `pip install -e .` 하지 말 것.
-- **소스 서버(`jk`) 기준 동작 버전**: torch 2.8.0 / transformers 4.51.3 / flash-attn 2.8.3 / RTX 3080 Ti(sm_86) / CUDA 12.9. 정확한 freeze는 `env/jk-conda-full.yml`, `env/jk-pip-freeze.txt`.
+- Python 3.12 + `requirements.txt`
+- 서버 CUDA에 맞는 PyTorch (본 실험은 torch 2.8.0 + CUDA 12.9)
+- **transformers는 4.51.3 고정** (KVzip이 의존하는 attention API 시그니처에 매우 민감)
+- flash-attn 2.8.3 (서버 GPU arch로 직접 빌드)
+- KVzip은 **`pip install -e .` 금지** — `../KVzip/`에 clone만 하고, `KVzip/csrc/build.py`의 GPU arch를 서버에 맞게 수정 후 커널 빌드
+- `KVZIP_DIR` 환경변수로 KVzip 경로 지정 가능 (기본: 형제 디렉토리)
 
-항상 `conda run -n jk ...` 또는 `conda activate jk` 후 실행.
+freeze된 패키지 목록은 `env/jk-conda-full.yml`, `env/jk-pip-freeze.txt`.
+
+이후 모든 실행은 `conda run -n jk ...` 또는 `conda activate jk` 후 진행.
 
 ---
 
-## 4. 실행법
+## 4. 재현 — 실험 1 (NIAH grid: prefill peak + 정확도)
 
-### 실험 1 — NIAH 길이 사다리 (peak 메모리 / OOM 한계)
+paper §4.2. 작은 fixed context(500 / 2000 / 8000 tokens)에서 (ratio × method)의 prefill peak 메모리와 needle 정확도(11 quantile depth 평균)를 동시에 측정. 같은 (ctx_len, depth)의 token ids는 한 번 생성되어 모든 셀에 동일 입력.
+
+### Qwen3-4B (primary)
 ```bash
-conda run -n jk python run_niah.py \
-    -m llama3.2-3b --method ours --level per_token \
-    --budget_max 8192 --budget_target 4096 --chunk 2048 \
-    --ctx_lens 4000,8000,16000,32000,48000,64000 --depth 50
+conda run -n jk python run_niah_grid.py -m qwen3-4b \
+    --ctx_lens 500,2000,8000 \
+    --depths 0,10,20,30,40,50,60,70,80,90,100 \
+    --ratios 0.0,0.2,0.4,0.6,0.8,1.0 \
+    --methods kvzip,ours,ours_predict_v1,ours_predict_v2,ours_predict_next,ours_combine
 ```
-각 길이마다 NIAH context를 만들어 prefill하며 **peak GPU 메모리**를 측정하고, OOM이 안 났으면 needle 질문에 답해 정확도를 본다. prefill OOM이 나면 그 사다리는 중단(더 길면 당연히 OOM). 결과 `results_niah/`에 저장.
 
-baseline과 비교(같은 인자로 `--method`만 바꿈):
+### Llama-3.2-3B
 ```bash
-for M in full kvzip streamllm ours; do
-  conda run -n jk python run_niah.py -m llama3.2-3b --method $M --level per_token \
-     --budget_max 8192 --budget_target 4096 --ctx_lens 4000,8000,16000,32000,48000,64000 --tag cmp
-done
+conda run -n jk python run_niah_grid.py -m llama3.2-3b \
+    --ctx_lens 500,2000,8000 \
+    --depths 0,10,20,30,40,50,60,70,80,90,100 \
+    --ratios 0.0,0.2,0.4,0.6,0.8,1.0 \
+    --methods kvzip,ours,ours_predict_v1,ours_predict_v2,ours_predict_next,ours_combine
 ```
-per_head도 동일하게 `--method ours --level per_head --head_ratio 0.5`.
 
-### 실험 2 — SCBench short-context multi-turn
+각 셀의 raw record는 `results/niah_grid/<model>_<method>_<level>_<timestamp>.json`, flat 요약은 `results/niah_grid_runs.jsonl`. paper §4.2의 Table 1·2·3 모두 이 그리드 출력에서 직접 발췌.
+
+---
+
+## 5. 재현 — 실험 2 (SCBench multi-turn)
+
+paper §4.3. 공유 long context를 한 번 prefill한 뒤, 질문을 순환하며 multi-turn 대화를 누적. ours는 각 (query+answer) turn을 즉시 `round(turn_ratio · L_t)`로 동적 압축; kvzip은 context만 압축하고 turn은 무한 누적 (baseline).
+
+### summary (compressible NL, 약 10k context, 100 turns, context r=0.4)
 ```bash
-conda run -n jk python run_scbench.py \
-    -m llama3.2-3b -d scbench_kv_tiny --method ours \
-    --budget_max 8192 --budget_target 4096 --turns 200 --turn_budget 2048
+# ours (repeat 기본)
+conda run -n jk python run_scbench.py -m qwen3-4b -d scbench_summary_short \
+    --method ours --comp_ratio 0.4 --turn_ratio 0.4 \
+    --turns 100 --consec_zero_stop 5
+
+# kvzip baseline (동일 retained ratio)
+conda run -n jk python run_scbench.py -m qwen3-4b -d scbench_summary_short \
+    --method kvzip --ratio 0.4 --turns 100 --consec_zero_stop 5
+
+# 프롬프트 변종 (prompt study)
+conda run -n jk python run_scbench.py -m qwen3-4b -d scbench_summary_short \
+    --method ours --comp_ratio 0.4 --turn_ratio 0.4 \
+    --use_predict_prompt --predict_prompt_version 1 --turns 100
+conda run -n jk python run_scbench.py -m qwen3-4b -d scbench_summary_short \
+    --method ours --comp_ratio 0.4 --turn_ratio 0.4 \
+    --use_predict_prompt --predict_prompt_version 2 --turns 100
+conda run -n jk python run_scbench.py -m qwen3-4b -d scbench_summary_short \
+    --method ours --comp_ratio 0.4 --turn_ratio 0.4 \
+    --combine_repeat --turns 100
 ```
-짧은 공유 context를 한 번 prefill한 뒤, 질문을 cycling하며 multi-turn 대화를 누적(`update_cache=True`)한다. ours는 누적분(turn KV)도 bound → 오래 버팀. `full`/`kvzip`은 bound 없이 누적 → 먼저 OOM. 살아남은 turn 수 / 턴별 메모리 / 정확도를 기록.
 
-### 주요 인자
-| 인자 | 의미 | 기본 |
-|---|---|---|
-| `--method` | full / kvzip / streamllm / ours | ours |
-| `--level` | per_token / per_head | per_token |
-| `--budget_max` | 압축 trigger(물리 context 토큰 수) | 8192 |
-| `--budget_target` | 압축 후 남길 토큰 수 | 4096 |
-| `--recent_window` | prefill 중 절대 안 버리는 최신 토큰 | 256 |
-| `--chunk` | prefill+scoring chunk 크기 | 2048 |
-| `--token_agg` | head/layer score 집계(mean/max) | mean |
-| `--rescore` | compaction 때 cached context 재-scoring | off |
-| `--head_ratio` | per_head finalize 남길 비율 | 0.5 |
-| `--ratio` | kvzip baseline prune 비율 | 0.3 |
+### kv (incompressible UUID 약 20k context, 150 turns, context full = r=1.0)
+random UUID 컨텍스트는 whole-position drop이 부적합 → context는 보존(`--comp_ratio 1.0 --light_drop_ratio 0`)하고 **turn 누적만** 압축 → multi-turn memory 효과 단독 검증.
+```bash
+conda run -n jk python run_scbench.py -m qwen3-4b -d scbench_kv_short \
+    --method ours --comp_ratio 1.0 --light_drop_ratio 0 --turn_ratio 0.4 \
+    --turns 150 --consec_zero_stop 5
+conda run -n jk python run_scbench.py -m qwen3-4b -d scbench_kv_short \
+    --method kvzip --ratio 1.0 --turns 150 --consec_zero_stop 5
+```
 
-### 결과 기록 & 집계 (paper.tex 작성용)
-모든 실행은 **자동으로 정확·상세하게 기록**된다(`ric/record.py`):
-- `results/niah/<model>_<method>_<level>_<tag>_<timestamp>.json` — 한 실행의 전체 detail(환경/GPU/모델 config/KV bytes-per-token/인자/cfg/모든 ctx_len row/생성된 답변/compaction 수/peak·cache 메모리/소요시간). **timestamp가 붙어 덮어쓰지 않음** → 여러 번 돌려도 다 남음.
-- `results/scbench/<...>.json` — 동일하게 prefill 통계 + 턴별 trace(메모리/정확도/답변).
-- `results/niah_runs.jsonl`, `results/scbench_runs.jsonl` — 실행마다 한 줄씩 누적되는 flat 요약(집계용).
+각 실행의 raw record는 `results/scbench/<...>.json` (턴별 trace 포함), flat 요약은 `results/scbench_runs.jsonl`.
 
-여러 실행을 돌린 뒤 **집계 → paper-ready 표** 생성:
+---
+
+## 6. 결과 집계 (paper 표 자동 생성)
+
 ```bash
 conda run -n jk python aggregate.py
 ```
+
 출력:
-- `results/summary_niah.md` — method×ctx_len **prefill peak 메모리 표**, 정확도 표, "OOM 전 최대 context" headline 표.
-- `results/summary_scbench.md` — method별 생존 turn 수 / 평균 정확도 / 메모리 표.
-- `results/summary_niah.csv`, `results/summary_scbench.csv` — long-format(플로팅/분석용).
+- `results/summary_niah_grid.md` — model × ctx_len 별 **prefill peak (GB) 표 + 정확도 표 + per-position 히트맵** (paper Table 1/2/3).
+- `results/summary_scbench.md` — method × task 별 **prefill / turn peak / cache / 정확도 / per-turn growth** (paper Table 4/5/6).
+- `results/summary_niah_grid.csv`, `results/summary_scbench.csv` — long-format (플롯/분석용).
 
-→ 실험을 돌리고 `aggregate.py`만 실행하면 `summary_*.md`/`.csv`가 갱신되고, 그 수치로 paper.tex를 작성하면 된다.
-
----
-
-## 5. 실험 설계 / 공정성
-
-- **Peak 측정:** `torch.cuda.max_memory_allocated()` (transient attention + 저장 KV 모두 포함). 매 실행 전 `reset_peak`.
-- **공정한 baseline:** `full`/`kvzip`도 우리와 같은 `--chunk`를 prefill_chunk_size로 사용 → transient는 동일, **저장 KV만 차이**나게 함. `kvzip`은 full prefill + scoring + per-head prune이라 peak ≥ full(thesis가 겨냥하는 지점).
-- **모델:** 12GB면 `llama3.2-3b`(가중치 ~6.4GB) 우선. OOM 한계가 너무 빨리 오면 `llama3.2-1b` / `qwen3-1.7b`로 헤드룸 확보.
-
-기대 결과: full/kvzip은 중간 길이(3B면 대략 30~40k)에서 prefill OOM, ours는 budget 덕에 훨씬 길게 진행. SCBench는 누적 turn에서 ours만 평탄한 메모리로 오래 생존.
+paper.tex의 모든 표 숫자는 이 두 markdown 파일에서 직접 발췌.
 
 ---
 
-## 6. 알려진 한계 / 아직 검증 안 된 부분
+## 7. 주요 CLI 인자 (`args.py` + `run_scbench.py`)
 
-코드는 **정적 syntax만 통과**했고 실제 실행은 안 했다. 런타임에서 점검/디버깅이 필요한 지점:
+| 인자 | 의미 | 기본 |
+|---|---|---|
+| `--method` | full / kvzip / streamllm / ours | ours |
+| `--level` | per_token (dense, multi-turn 필수) / per_head (KVzip varlen finalize) | per_token |
+| `--comp_ratio` | 두 메서드에 동일 적용되는 retained 비율 $r$. kvzip prune ratio = $r$; ours는 $B_f = \text{round}(rL)$로 자동 derive. `<0`이면 off (옛 명시 budget 사용) | -1 |
+| `--intermediate_budget` (B_i) | heavy-prune 후 segment당 유지 토큰 수 (comp_ratio가 자동 derive) | 2048 |
+| `--working_max` | heavy-prune 트리거 (0이면 `2*B_i`) | 0 |
+| `--final_budget` (B_f) | 누적 committed 캡 | 8192 |
+| `--recent_window` | prune 시 절대 안 버리는 최신 토큰 | 256 |
+| `--chunk` | prefill + scoring chunk 크기 (NIAH grid 기본은 512) | 2048 |
+| `--token_agg` | head/layer score 집계 (mean / max) | mean |
+| `--light_drop_ratio` | chunk 별 light drop 컷오프 (`score < ratio*chunk_max`) | 0.05 |
+| `--no_rescore_working` | heavy-prune 전 working 재스코어 비활성 | off |
+| `--head_ratio` | per_head finalize 유지 비율 | 0.5 |
+| `--use_predict_prompt` / `--predict_prompt_version {1,2}` | 중간 prune을 predict-self 프롬프트로 (최종 compaction은 항상 repeat) | off / 1 |
+| `--predict_target {self,next_chunk}` | predict 신호 종류 (next_chunk는 sink/recent 보호) | self |
+| `--combine_repeat` / `--combine_mode {max,wsum}` / `--combine_alpha` | 중간 점수 = combine(repeat, predict) | off / max / 0.5 |
+| `--sink_tokens` | predict-next boundary 보호용 leading sink 토큰 수 | 4 |
+| `--ratio` | kvzip baseline의 retained ratio (`--comp_ratio` 미지정 시 사용) | 0.3 |
+| `--turn_ratio` *(scbench)* | DYNAMIC per-turn 압축 비율. `<0`이면 legacy fixed-cap | 0.4 |
+| `--turn_base_budget` *(scbench)* | turn 압축 base budget. `<0`이면 context $B_f$ 사용 | -1 |
+| `--turn_cap_mult` *(scbench legacy)* | fixed-cap 모드의 turn region 캡 배수 | 2 |
+| `--turn_rescore_every` *(scbench legacy)* | full repeat 재스코어 주기 (cap reprunes) | 8 |
+| `--consec_zero_stop` *(scbench)* | acc=0 연속 N turn이면 정지 | 5 |
+| `--max_new` | answer 생성 max new tokens | 64 |
+| `--device` / `--tag` | GPU id / 실행 태그 | 0 / None |
 
-1. **mid-prefill eviction 후의 dense 재-prefill** — `_seen_tokens`(logical)와 물리 cache 길이가 어긋난 상태에서 다음 chunk를 prefill하는 경로는 KVzip이 직접 시험하지 않은 사용법이다(KVzip은 prefill 다 끝낸 뒤에만 prune). 위 불변식상 맞게 설계했으나 첫 실행 시 RoPE/positional 동작을 확인할 것.
-2. **gappy re-scoring(`--rescore`)** — 압축으로 구멍 난 cache를 다시 점수화할 때 살아남은 key는 원래 RoPE를 유지. 근사이며(품질은 NIAH/SCBench가 드러냄) 기본 off.
-3. **per_head + multi-turn** — varlen cache는 dense turn-eviction과 호환되지 않아 SCBench는 per_token으로 강제(코드가 경고 후 fallback). per_head multi-turn(varlen-aware turn 관리)은 향후 과제.
-4. **compaction 순간 transient spike** — `torch.cat`으로 새 텐서를 만들므로 압축 순간 일시적으로 old+new가 공존(≈2×budget). bound 안이지만 `index_select` in-place로 최적화 여지.
-5. **per_head의 메모리 이점** — 현재 per_head는 prefill peak를 per_token과 *같은* budget으로 bound하고, finalize에서만 추가로 줄인다. prefill 도중부터 head별로 다른 길이를 저장하는 "진짜 varlen 스트리밍"(더 낮은 peak)은 fresh-chunk를 varlen에서 dense로 추출해 점수화하는 기법이 필요하며 향후 과제. (메모리 노트 `ric-implementation-plan` 참고)
+`--comp_ratio` + `--turn_ratio`가 본 실험에서 권장하는 **유일한 두 손잡이**다. 나머지는 ablation용.
 
 ---
 
-## 7. 다음 단계
-1. tiny 설정으로 smoke test: `-m llama3.2-1b --ctx_lens 2000,4000 --budget_max 2048 --budget_target 1024` 가 도는지 + needle 정확도 확인.
-2. per_token NIAH 사다리 full-sweep → baseline 대비 OOM 한계 그래프.
-3. per_head NIAH 비교(정확도/메모리).
-4. SCBench multi-turn 생존 turn 수 비교.
-5. 결과를 `paper.tex` Problem/Approach/Experiment에 반영(peak prefill 메모리 프레이밍).
+## 8. Peak 측정 방식
+
+`ric/mem.py`의 `peak_gb` / `reset_peak` 가 모든 실험에서 호출된다.
+
+- Peak = `torch.cuda.max_memory_allocated()` (KV 저장 + transient attention activation 모두 포함)
+- 매 셀 시작에서 `reset_peak()` (= `torch.cuda.reset_peak_memory_stats()` + `gc.collect()` + `torch.cuda.empty_cache()`)
+- 전 forward는 bf16, attention backend는 flash-attn 2.8.3
+- NIAH context는 (ctx_len, depth)당 한 번 생성된 token ids를 모든 (method, ratio) 셀에 동일 입력 → 메서드 간 차이는 저장 KV만의 함수
+
+paper §4.1의 "Memory protocol" 단락과 동기.
+
+---
+
+## 9. 결과가 어디에 있는가
+
+| 종류 | 위치 |
+|---|---|
+| 전체 한국어 분석 / staging notes | `RESULTS_NOTES.md` |
+| NIAH 셀별 JSON | `results/niah_grid/*.json` |
+| NIAH 표 (paper) | `results/summary_niah_grid.md`, `.csv` |
+| SCBench 실행별 JSON (턴별 trace 포함) | `results/scbench/*.json` |
+| SCBench 표 (paper) | `results/summary_scbench.md`, `.csv` |
+| 단일 NIAH ladder 결과 | `results/niah/*.json`, `results/summary_niah.md` (preliminary long-context evidence) |
+
+---
+
+## 10. 알려진 한계 / 향후 과제
+
+`paper.tex` Conclusion과 동기:
+
+1. **per_token whole-position drop이 incompressible context에 부적합.** scbench_kv (random UUID)에서는 per_token으로 압축하면 정답이 사라진다. KVzip의 per_head는 각 position을 일부 head라도 보존하므로 살아남는다. 본 실험은 워크어라운드로 kv 태스크의 context는 `--comp_ratio 1.0`(full)로 두고 turn만 압축. **하이브리드 cache**(per-head context + dense turns) 가 future work — varlen에서 fresh chunk를 dense로 추출해 점수화하는 커널이 필요.
+2. **r=0.2 + 8k tokens 극단 압축에서 NIAH 정확도 dip.** ours 0.73 vs KVzip 1.00 (Qwen3-4B). streaming은 이미 drop한 mid-context needle을 다시 복구할 수 없음 — 본 트레이드오프는 본 방법 고유의 한계로 paper에 솔직히 명시.
+3. **장문 context systematic 평가 부족.** 본 grid는 8k까지. 메모리 노트의 preliminary ladder (Qwen3-4B per_token: ours는 120k까지 budget 내, KVzip은 96k에서 OOM)는 추세는 보여주지만 per-head 그리드와는 일치하지 않음. **16k–128k systematic eval**이 가장 즉시 다음 단계.
+4. **벤치마크 다양성.** NIAH (single needle) + SCBench summary/kv 두 task만 검증됨. multi-needle / LongBench / multi-document QA / multi-query 까지 확장이 paper의 "query-robust" claim을 더 강하게 만든다.
+5. **per_head + multi-turn.** 현재 SCBench는 per_token 강제 (varlen cache는 dense turn append와 호환 X). 위 1번과 함께 future work.
+6. **prune 순간 transient spike.** `torch.cat`으로 새 텐서 생성 → 일시적으로 old+new 공존. 모든 transient는 budget 안이지만 `index_select` in-place로 최적화 여지.
+
+---
+
+## 11. Citing
+
+본 레포의 baseline 및 기반:
+- **KVzip** (Kim et al. 2026) — reconstruction-based importance + per-head varlen prune. `kim2026kvzip`.
+- 그 외 KV cache compression / loading 라인업은 `paper.tex`의 references 참고 (StreamLLM, SnapKV, PyramidKV, H2O, SCOPE, EpiCache, Quest, Squeezed Attention 등).

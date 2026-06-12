@@ -16,3 +16,6 @@ results_scbench/
 *.log
 .venv/
 .DS_Store
+
+RESULTS_NOTES.md
+SETUP.md

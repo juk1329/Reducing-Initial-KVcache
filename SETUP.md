@@ -164,8 +164,9 @@ Models download on first run. Open alternatives that need no gating: `qwen3-1.7b
 ```bash
 cd <workspace>/Reducing-Initial-KVcache
 # tiny smoke test: confirms streaming prefill + answer run end to end
-python run_niah.py -m llama3.2-1b --method ours --level per_token \
-    --budget_max 2048 --budget_target 1024 --chunk 1024 --ctx_lens 2000,4000
+python run_niah.py -m qwen3-1.7b --method ours --level per_token \
+    --chunk 512 --intermediate_budget 512 --working_max 1024 --final_budget 1024 \
+    --ctx_lens 2000,4000
 
 # full experiments + comparison: see README.md §4
 python aggregate.py        # build paper-ready tables from results/

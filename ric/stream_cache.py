@@ -40,33 +40,57 @@ class StreamingCache(EvictCache):
         self,
         model,
         sink_len: int,
-        budget_max: int,
-        budget_target: int,
+        intermediate_budget: int,
+        working_max: int,
+        final_budget: int,
         recent_window: int = 256,
         token_agg: str = "mean",
+        light_drop_ratio: float = 0.05,
         importance: str = "score",  # "score" (reconstruction) or "recent" (StreamingLLM baseline)
     ):
         # evict_range = (sink, sink): sink = system-prompt length, context starts empty.
         super().__init__(model, evict_range=(sink_len, sink_len))
-        self.budget_max = int(budget_max)
-        self.budget_target = int(budget_target)
+        self.intermediate_budget = int(intermediate_budget)  # B_i: tokens KEPT per committed segment
+        self.working_max = int(working_max)                  # heavy-prune trigger (working window size)
+        self.final_budget = int(final_budget)                # B_f: cap on total committed context
         self.recent_window = int(recent_window)
         self.token_agg = token_agg
+        self.light_drop_ratio = float(light_drop_ratio)
         self.importance = importance
 
-        # logical/physical bookkeeping for the CONTEXT region (excludes sink)
+        # logical/physical bookkeeping for the CONTEXT region (excludes sink).
+        # Physical layout: [sink | committed (frozen) | working]. `committed_len` counts
+        # the frozen committed context positions; the working window is [committed_len, ctx_len).
         self.ctx_len = 0                     # physical context positions currently stored (P)
+        self.committed_len = 0               # frozen committed positions (<= ctx_len)
         self.logical_ctx_len = 0             # total context tokens ever processed (>= ctx_len)
         # per-position metadata (length P), kept on CPU-cheap long tensors
         self.ctx_pos = torch.zeros((0,), dtype=torch.long, device=self.device)        # original logical pos
-        self.ctx_token_ids = torch.zeros((1, 0), dtype=torch.long, device=self.device)  # for --rescore
+        self.ctx_token_ids = torch.zeros((1, 0), dtype=torch.long, device=self.device)  # for re-scoring
 
         # restore points for the (non-cache-updating) scoring forward
         self._restore_phys: Optional[int] = None
         self._restore_seen: Optional[int] = None
 
-        self.num_compactions = 0
+        self.num_segments = 0                # committed segments produced (heavy prunes)
+        self.num_final_reprunes = 0          # global committed re-prunes at the final budget
         self.peak_phys_ctx = 0
+
+        # StreamingLLM-style boundary protection (used by the predict-next-chunk method):
+        # the first `protected_prefix_len` context positions (sink) and the last
+        # `protected_suffix_len` context positions (recent / final chunk) are kept with
+        # infinite importance, so only the MIDDLE is compressed by predict-target scores.
+        # Best-effort: still subject to the topk budget when the budget is smaller.
+        self.protected_prefix_len = 0
+        self.protected_suffix_len = 0
+
+    @property
+    def num_compactions(self) -> int:
+        """Back-compat alias (total prune operations) for the experiment/aggregate scripts."""
+        return self.num_segments + self.num_final_reprunes
+
+    def working_len(self) -> int:
+        return self.ctx_len - self.committed_len
 
     # --------------------------------------------------------------------- utils
     def phys_total(self) -> int:
@@ -124,9 +148,6 @@ class StreamingCache(EvictCache):
         return start, end
 
     # ------------------------------------------------------------------ compaction
-    def need_compact(self) -> bool:
-        return self.ctx_len > self.budget_max
-
     def _position_importance(self) -> torch.Tensor:
         """Collapse per-(layer, head, position) scores into one importance value
         per physical context position. Shape -> [P]."""
@@ -142,25 +163,96 @@ class StreamingCache(EvictCache):
             imp = s.mean(dim=(0, 1, 2))
         return imp
 
-    def compact(self):
-        """Token-level compaction: keep the `budget_target` most important context
-        positions (plus a protected recent window), drop the rest physically.
-        Keeps the cache dense and re-scorable."""
-        P = self.ctx_len
-        if P <= self.budget_target:
+    def light_drop(self, chunk_len: int):
+        """Hybrid per-chunk LIGHT drop: within the just-prefilled chunk, physically
+        drop tokens whose importance is below `light_drop_ratio` * (that chunk's max).
+        Removes clear junk early so the working window grows slower. Never touches the
+        committed region; score-based only (callers skip this for the recency baseline)."""
+        if self.light_drop_ratio <= 0 or chunk_len <= 0:
             return
-        imp = self._position_importance().clone()  # [P]
+        P = self.ctx_len
+        start = max(P - chunk_len, self.committed_len)  # never drop committed
+        imp = self._position_importance()               # [P]
+        chunk_imp = imp[start:]
+        if chunk_imp.numel() == 0:
+            return
+        thr = self.light_drop_ratio * float(chunk_imp.max())
+        keep_local = (chunk_imp >= thr).nonzero(as_tuple=False).squeeze(-1)
+        if keep_local.numel() == chunk_imp.numel():
+            return                                      # nothing below threshold
+        head = torch.arange(start, device=self.device)
+        self._reindex_context(torch.cat([head, start + keep_local]))
 
-        rw = min(self.recent_window, P)
+    def prune_working_to_segment(self):
+        """Heavy prune of the WORKING window down to `intermediate_budget` (top-K by
+        importance, plus a protected recent tail), then freeze the survivors into the
+        committed region and reset the working window. This is the per-segment
+        compression triggered when the working window reaches `working_max`."""
+        work_start = self.committed_len
+        work_len = self.ctx_len - work_start
+        if work_len <= 0:
+            return
+        imp = self._position_importance().clone()       # [P]
+        work_imp = imp[work_start:]
+        # protect the sink prefix if any of it still lives in the working window
+        pp = self.protected_prefix_len - work_start
+        if pp > 0:
+            work_imp[:min(pp, work_len)] = float("inf")
+        # protect the recent tail (and the final/recent chunk once it is known)
+        rw = min(max(self.recent_window, self.protected_suffix_len), work_len)
         if rw > 0:
-            imp[P - rw:] = float("inf")  # never drop the freshest tokens
+            work_imp[work_len - rw:] = float("inf")      # never drop the freshest working tokens
+        k = min(max(self.intermediate_budget, rw), work_len)
+        kept_local = torch.topk(work_imp, k).indices
+        kept_local, _ = torch.sort(kept_local)           # preserve causal (logical) order
+        head = torch.arange(work_start, device=self.device)
+        self._reindex_context(torch.cat([head, work_start + kept_local]))
+        self.committed_len = self.ctx_len                # survivors are now frozen committed
+        self.num_segments += 1
 
-        k = min(max(self.budget_target, rw), P)
-        kept = torch.topk(imp, k).indices
-        kept, _ = torch.sort(kept)  # preserve causal (logical) order
+    def commit_working(self):
+        """Freeze the current working window into committed WITHOUT heavy pruning (used
+        for the trailing partial segment at end of prefill). The final_budget cap is
+        enforced separately by reprune_committed_to_final()."""
+        self.committed_len = self.ctx_len
 
-        self._reindex_context(kept)
-        self.num_compactions += 1
+    def reprune_committed_to_final(self):
+        """Final-budget enforcement: if committed context exceeds `final_budget`, keep
+        the top-`final_budget` committed positions by importance (global over committed)
+        and drop the rest. Any working window is left untouched."""
+        if self.committed_len <= self.final_budget:
+            return
+        imp = self._position_importance().clone()        # [P]
+        comm_imp = imp[:self.committed_len]
+        # protect sink prefix and recent suffix (best-effort within the budget)
+        if self.protected_prefix_len > 0:
+            comm_imp[:min(self.protected_prefix_len, self.committed_len)] = float("inf")
+        if self.protected_suffix_len > 0:
+            comm_imp[max(0, self.committed_len - self.protected_suffix_len):] = float("inf")
+        kept_comm = torch.topk(comm_imp, self.final_budget).indices
+        kept_comm, _ = torch.sort(kept_comm)
+        tail = torch.arange(self.committed_len, self.ctx_len, device=self.device)  # working
+        self._reindex_context(torch.cat([kept_comm, tail]))
+        self.committed_len = self.final_budget
+        self.num_final_reprunes += 1
+
+    def reprune_turns_to_cap(self, context_len: int, turn_cap: int):
+        """Multi-turn hard compression: keep the protected initial context [0, context_len)
+        intact and re-prune the committed TURN region [context_len, committed_len) down to the
+        top-`turn_cap` positions by importance (scores should be repeat-based here). Any working
+        tail is preserved. Used when the accumulated turns exceed the growing m*B_f cap."""
+        turn_committed = self.committed_len - context_len
+        if turn_committed <= turn_cap:
+            return
+        imp = self._position_importance().clone()              # [P]
+        turn_imp = imp[context_len:self.committed_len]
+        kept = torch.topk(turn_imp, turn_cap).indices
+        kept, _ = torch.sort(kept)                              # preserve causal order
+        head = torch.arange(context_len, device=self.device)   # protected initial context
+        tail = torch.arange(self.committed_len, self.ctx_len, device=self.device)  # working (if any)
+        self._reindex_context(torch.cat([head, context_len + kept, tail]))
+        self.committed_len = context_len + turn_cap
+        self.num_final_reprunes += 1
 
     def _reindex_context(self, kept_idx: torch.Tensor):
         """Physically keep only `kept_idx` (indices into [0, P)) of the context

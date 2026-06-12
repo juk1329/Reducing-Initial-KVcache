@@ -30,7 +30,8 @@ from ric import KVZIP_DIR
 from ric.baselines import build_prefill_fn
 from ric.mem import run_oom_safe, total_gb, peak_gb, reset_peak
 from ric.record import capture_env, save_run
-from ric.stream_prefill import answer
+from ric.stream_prefill import answer, derive_ric_budgets
+from dataclasses import replace
 
 from model import ModelKVzip
 from data.needle import NeedleHaystackData
@@ -63,14 +64,24 @@ def main():
     cfg = cfg_from_args(a)
     ctx_lens = [int(x) for x in a.ctx_lens.split(",")]
 
+    # compression-ratio sweep mode: a single retained fraction r applied to both methods.
+    use_cr = a.comp_ratio is not None and a.comp_ratio >= 0.0
+    eff_kvzip_ratio = a.comp_ratio if use_cr else a.ratio
     print(f"GPU total ~{total_gb(a.device):.1f}GB | model={a.model} method={a.method} "
-          f"level={a.level} budget_max={a.budget_max} target={a.budget_target} chunk={a.chunk}")
+          f"level={a.level} "
+          + (f"comp_ratio={a.comp_ratio} (final_budget=round(r*L), B_i/working_max derived) "
+             if use_cr else
+             f"B_i={a.intermediate_budget} working_max={cfg.working_max} B_f={cfg.final_budget} ")
+          + f"chunk={a.chunk}")
     model = ModelKVzip(a.model, kv_type="evict")
     env = capture_env(model, a.device)
     print(f"env: {env.get('gpu_name')} {env.get('gpu_total_gb')}GB | "
           f"KV {env.get('kv_gb_per_1k_tokens')} GB/1k tok | "
           f"torch {env.get('torch')} tf {env.get('transformers')} fa {env.get('flash_attn')}")
-    prefill_fn = build_prefill_fn(a.method, model, cfg, ratio=a.ratio)
+    # For ours under a comp_ratio sweep the budgets depend on ctx_len, so the prefill fn is
+    # rebuilt per length (below). Otherwise build it once here.
+    ours_cr = use_cr and a.method in ("ours", "ric")
+    prefill_fn = None if ours_cr else build_prefill_fn(a.method, model, cfg, ratio=eff_kvzip_ratio)
 
     rows = []
     for L in ctx_lens:
@@ -79,18 +90,31 @@ def main():
         ctx_ids = model.encode(ctx)
         true_len = ctx_ids.shape[1]
 
+        # effective budgets for this length (derived from comp_ratio for ours)
+        if ours_cr:
+            fb, bi, wm = derive_ric_budgets(a.comp_ratio, true_len, a.chunk, a.recent_window)
+            cfg_L = replace(cfg, final_budget=fb, intermediate_budget=bi, working_max=wm)
+            prefill_fn = build_prefill_fn("ours", model, cfg_L, ratio=eff_kvzip_ratio)
+            eff_ib, eff_wm, eff_fb = cfg_L.intermediate_budget, cfg_L.working_max, cfg_L.final_budget
+        else:
+            eff_ib, eff_wm, eff_fb = cfg.intermediate_budget, cfg.working_max, cfg.final_budget
+
         t0 = time.time()
         kv, info = run_oom_safe(lambda: prefill_fn(ctx_ids), device=a.device)
         row = {
             "ctx_len": L, "true_len": int(true_len),
             "method": a.method, "level": a.level,
-            "budget_max": a.budget_max, "budget_target": a.budget_target,
+            "comp_ratio": (a.comp_ratio if use_cr else None),
+            "kvzip_ratio": (eff_kvzip_ratio if a.method == "kvzip" else None),
+            "intermediate_budget": eff_ib, "working_max": eff_wm,
+            "final_budget": eff_fb,
             "prefill_status": info["status"],
             "prefill_peak_gb": info["peak_gb"],
             "prefill_alloc_gb": info.get("alloc_gb"),
             "prefill_sec": round(time.time() - t0, 2),
             "answer_peak_gb": None, "cache_gb": None,
-            "num_compactions": None, "peak_phys_ctx": None, "logical_ctx_len": None,
+            "num_compactions": None, "num_segments": None,
+            "peak_phys_ctx": None, "logical_ctx_len": None,
             "acc": None, "answer": None, "question": q, "gold": gold,
             "error": info.get("error"),
         }
@@ -98,6 +122,7 @@ def main():
         if info["status"] == "ok":
             # capture compaction stats (StreamingCache only; baselines lack them)
             row["num_compactions"] = getattr(kv, "num_compactions", None)
+            row["num_segments"] = getattr(kv, "num_segments", None)
             row["peak_phys_ctx"] = getattr(kv, "peak_phys_ctx", None)
             row["logical_ctx_len"] = getattr(kv, "logical_ctx_len", None)
             row["cache_gb"] = float(kv._mem())
