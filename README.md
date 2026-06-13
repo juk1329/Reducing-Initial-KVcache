@@ -85,8 +85,26 @@ KVzip은 형제 디렉토리 `../KVzip/`에 있어야 한다(설치 X — KVzip�
 - 서버 CUDA에 맞는 PyTorch (본 실험은 torch 2.8.0 + CUDA 12.9)
 - **transformers는 4.51.3 고정** (KVzip이 의존하는 attention API 시그니처에 매우 민감)
 - flash-attn 2.8.3 (서버 GPU arch로 직접 빌드)
-- KVzip은 **`pip install -e .` 금지** — `../KVzip/`에 clone만 하고, `KVzip/csrc/build.py`의 GPU arch를 서버에 맞게 수정 후 커널 빌드
+- KVzip은 **`pip install -e .` 금지** — `../KVzip/`에 clone만 하고, `KVzip/csrc/build.py`의 GPU arch를 서버에 맞게 수정 후 커널 빌드 (아래 패치 참고)
 - `KVZIP_DIR` 환경변수로 KVzip 경로 지정 가능 (기본: 형제 디렉토리)
+
+### KVzip upstream에 적용해야 하는 한 줄 패치 (`KVzip/csrc/build.py`)
+
+KVzip 레포는 다른 연구실 코드라 본 레포에 함께 올리지 않는다. 본 실험은 **L4 24GB GPU (Ada, `sm_89`)**에서 돌렸는데 KVzip upstream의 `csrc/build.py`는 `sm_80` (A100) + `sm_90` (H100)만 `-gencode` 대상으로 컴파일한다. L4·L40·RTX 4090(Ada)이나 RTX 3080 Ti·3090(Ampere 소비자 `sm_86`)에서는 `tiny_api_cuda` 확장을 빌드해도 해당 arch용 SASS가 없어 import 시점에 driver JIT에 의존하거나 로드 실패한다.
+
+따라서 KVzip clone 후 `csrc/build.py`의 `cc_flag` 블록에 다음 두 항목을 **추가**한 뒤 `python csrc/build.py build_ext --inplace`로 커널을 빌드해야 한다:
+
+```python
+# csrc/build.py 의 cc_flag 블록 아래에 추가
+# RTX 3080 Ti / 3090 (Ampere sm_86)
+cc_flag.append("-gencode")
+cc_flag.append("arch=compute_86,code=sm_86")
+# L4 / L40 / RTX 4090 (Ada sm_89)
+cc_flag.append("-gencode")
+cc_flag.append("arch=compute_89,code=sm_89")
+```
+
+**실험 결과에 미치는 영향:** 알고리즘/커널 소스/수치 동작은 전혀 바뀌지 않는다 — 같은 코드를 더 많은 GPU arch용으로 컴파일할 뿐. 즉 *재현성*에는 필수지만 *결과값*에는 영향 없음. 서버 GPU가 sm_80(A100) / sm_90(H100)이면 패치 없이도 그대로 작동.
 
 freeze된 패키지 목록은 `env/jk-conda-full.yml`, `env/jk-pip-freeze.txt`.
 
