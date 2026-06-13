@@ -1,0 +1,67 @@
+GPU total ~23.7GB | model=qwen3-4b method=kvzip level=per_token comp_ratio=0.6 (final_budget=round(r*L), B_i/working_max derived) chunk=4096
+Replace qwen3 attention with KVzip
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.51it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.47it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.66it/s]
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+================================================================================ 
+[ctx_len=8000] building NIAH ...
+Token indices sequence length is longer than the specified maximum sequence length for this model (149704 > 131072). Running this sequence through the model will result in indexing errors
+insertion at 3983
+chunk inputs, size: 4096 (num 2)
+Prefill:   0%|          | 0/2 [00:00<?, ?it/s]Prefill:  50%|█████     | 1/2 [00:00<00:00,  1.34it/s]Prefill: 100%|██████████| 2/2 [00:01<00:00,  1.10it/s]Prefill: 100%|██████████| 2/2 [00:01<00:00,  1.13it/s]
+chunk inputs, size: 2000 (num 4)
+Importance scoring:   0%|          | 0/4 [00:00<?, ?it/s]Importance scoring:  25%|██▌       | 1/4 [00:00<00:02,  1.35it/s]Importance scoring:  50%|█████     | 2/4 [00:02<00:02,  1.05s/it]Importance scoring:  75%|███████▌  | 3/4 [00:03<00:01,  1.15s/it]Importance scoring: 100%|██████████| 4/4 [00:04<00:00,  1.18s/it]Importance scoring: 100%|██████████| 4/4 [00:04<00:00,  1.13s/it]
+ratio 0.60 (pair), 0.7 GB (evict 922284 pairs)
+  -> OK prefill_peak=10.67GB cache=0.70GB compactions=None acc=1.00 | 'Based on the content of the book, the best thing to do in San Francisco is eat a'
+================================================================================ 
+[ctx_len=16000] building NIAH ...
+insertion at 7973
+chunk inputs, size: 4096 (num 4)
+Prefill:   0%|          | 0/4 [00:00<?, ?it/s]Prefill:  25%|██▌       | 1/4 [00:00<00:01,  2.27it/s]Prefill:  50%|█████     | 2/4 [00:01<00:01,  1.26it/s]Prefill:  75%|███████▌  | 3/4 [00:02<00:00,  1.03it/s]Prefill: 100%|██████████| 4/4 [00:03<00:00,  1.11s/it]Prefill: 100%|██████████| 4/4 [00:03<00:00,  1.00it/s]
+chunk inputs, size: 2000 (num 8)
+Importance scoring:   0%|          | 0/8 [00:00<?, ?it/s]Importance scoring:  12%|█▎        | 1/8 [00:00<00:05,  1.20it/s]Importance scoring:  25%|██▌       | 2/8 [00:02<00:07,  1.19s/it]Importance scoring:  38%|███▊      | 3/8 [00:03<00:06,  1.30s/it]Importance scoring:  50%|█████     | 4/8 [00:05<00:05,  1.36s/it]Importance scoring:  62%|██████▎   | 5/8 [00:06<00:04,  1.39s/it]Importance scoring:  75%|███████▌  | 6/8 [00:08<00:02,  1.40s/it]Importance scoring:  88%|████████▊ | 7/8 [00:09<00:01,  1.42s/it]Importance scoring: 100%|██████████| 8/8 [00:10<00:00,  1.42s/it]Importance scoring: 100%|██████████| 8/8 [00:10<00:00,  1.36s/it]
+ratio 0.60 (pair), 1.4 GB (evict 1845961 pairs)
+  -> OK prefill_peak=11.85GB cache=1.40GB compactions=None acc=1.00 | 'Based on the content of the book, the best thing to do in San Francisco is eat a'
+================================================================================ 
+[ctx_len=32000] building NIAH ...
+insertion at 15980
+chunk inputs, size: 4096 (num 8)
+Prefill:   0%|          | 0/8 [00:00<?, ?it/s]Prefill:  12%|█▎        | 1/8 [00:00<00:03,  2.24it/s]Prefill:  25%|██▌       | 2/8 [00:01<00:04,  1.25it/s]Prefill:  38%|███▊      | 3/8 [00:02<00:04,  1.02it/s]Prefill:  50%|█████     | 4/8 [00:04<00:04,  1.15s/it]Prefill:  62%|██████▎   | 5/8 [00:05<00:03,  1.30s/it]Prefill:  75%|███████▌  | 6/8 [00:07<00:02,  1.45s/it]Prefill:  88%|████████▊ | 7/8 [00:09<00:01,  1.61s/it]Prefill: 100%|██████████| 8/8 [00:11<00:00,  1.70s/it]Prefill: 100%|██████████| 8/8 [00:11<00:00,  1.40s/it]
+chunk inputs, size: 2000 (num 16)
+Importance scoring:   0%|          | 0/16 [00:00<?, ?it/s]Importance scoring:   6%|▋         | 1/16 [00:01<00:15,  1.06s/it]Importance scoring:  12%|█▎        | 2/16 [00:02<00:21,  1.51s/it]Importance scoring:  19%|█▉        | 3/16 [00:04<00:21,  1.65s/it]Importance scoring:  25%|██▌       | 4/16 [00:06<00:20,  1.72s/it]Importance scoring:  31%|███▏      | 5/16 [00:08<00:19,  1.76s/it]Importance scoring:  38%|███▊      | 6/16 [00:10<00:17,  1.78s/it]Importance scoring:  44%|████▍     | 7/16 [00:12<00:16,  1.80s/it]Importance scoring:  50%|█████     | 8/16 [00:13<00:14,  1.81s/it]Importance scoring:  56%|█████▋    | 9/16 [00:15<00:12,  1.81s/it]Importance scoring:  62%|██████▎   | 10/16 [00:17<00:10,  1.82s/it]Importance scoring:  69%|██████▉   | 11/16 [00:19<00:09,  1.82s/it]Importance scoring:  75%|███████▌  | 12/16 [00:21<00:07,  1.82s/it]Importance scoring:  81%|████████▏ | 13/16 [00:22<00:05,  1.82s/it]Importance scoring:  88%|████████▊ | 14/16 [00:24<00:03,  1.82s/it]Importance scoring:  94%|█████████▍| 15/16 [00:26<00:01,  1.82s/it]Importance scoring: 100%|██████████| 16/16 [00:28<00:00,  1.81s/it]Importance scoring: 100%|██████████| 16/16 [00:28<00:00,  1.77s/it]
+ratio 0.60 (pair), 2.8 GB (evict 3690206 pairs)
+  -> OK prefill_peak=14.22GB cache=2.80GB compactions=None acc=1.00 | 'Eat a sandwich and sit in Dolores Park on a sunny day.'
+================================================================================ 
+[ctx_len=64000] building NIAH ...
+insertion at 31959
+chunk inputs, size: 4096 (num 16)
+Prefill:   0%|          | 0/16 [00:00<?, ?it/s]Prefill:   6%|▋         | 1/16 [00:00<00:06,  2.23it/s]Prefill:  12%|█▎        | 2/16 [00:01<00:11,  1.25it/s]Prefill:  19%|█▉        | 3/16 [00:02<00:12,  1.02it/s]Prefill:  25%|██▌       | 4/16 [00:04<00:13,  1.14s/it]Prefill:  31%|███▏      | 5/16 [00:05<00:14,  1.28s/it]Prefill:  38%|███▊      | 6/16 [00:07<00:14,  1.44s/it]Prefill:  44%|████▍     | 7/16 [00:09<00:14,  1.59s/it]Prefill:  50%|█████     | 8/16 [00:11<00:13,  1.75s/it]Prefill:  56%|█████▋    | 9/16 [00:13<00:13,  1.91s/it]Prefill:  62%|██████▎   | 10/16 [00:16<00:12,  2.07s/it]Prefill:  69%|██████▉   | 11/16 [00:19<00:11,  2.36s/it]Prefill:  75%|███████▌  | 12/16 [00:22<00:11,  2.79s/it]Prefill:  81%|████████▏ | 13/16 [00:24<00:07,  2.50s/it]Prefill:  88%|████████▊ | 14/16 [00:29<00:06,  3.13s/it]Prefill:  94%|█████████▍| 15/16 [00:31<00:03,  3.01s/it]Prefill: 100%|██████████| 16/16 [00:34<00:00,  2.79s/it]Prefill: 100%|██████████| 16/16 [00:34<00:00,  2.14s/it]
+chunk inputs, size: 2000 (num 32)
+Importance scoring:   0%|          | 0/32 [00:00<?, ?it/s]Importance scoring:   3%|▎         | 1/32 [00:02<01:18,  2.55s/it]Importance scoring:   6%|▋         | 2/32 [00:04<01:01,  2.04s/it]Importance scoring:   9%|▉         | 3/32 [00:06<01:06,  2.28s/it]Importance scoring:  12%|█▎        | 4/32 [00:09<01:06,  2.39s/it]Importance scoring:  16%|█▌        | 5/32 [00:11<01:06,  2.45s/it]Importance scoring:  19%|█▉        | 6/32 [00:14<01:04,  2.49s/it]Importance scoring:  22%|██▏       | 7/32 [00:17<01:02,  2.51s/it]Importance scoring:  25%|██▌       | 8/32 [00:19<01:00,  2.52s/it]Importance scoring:  28%|██▊       | 9/32 [00:22<00:58,  2.53s/it]Importance scoring:  31%|███▏      | 10/32 [00:24<00:55,  2.54s/it]Importance scoring:  34%|███▍      | 11/32 [00:27<00:53,  2.55s/it]Importance scoring:  38%|███▊      | 12/32 [00:29<00:50,  2.55s/it]Importance scoring:  41%|████      | 13/32 [00:32<00:48,  2.55s/it]Importance scoring:  44%|████▍     | 14/32 [00:34<00:45,  2.56s/it]Importance scoring:  47%|████▋     | 15/32 [00:37<00:43,  2.55s/it]Importance scoring:  50%|█████     | 16/32 [00:40<00:40,  2.56s/it]Importance scoring:  53%|█████▎    | 17/32 [00:42<00:38,  2.56s/it]Importance scoring:  56%|█████▋    | 18/32 [00:45<00:35,  2.55s/it]Importance scoring:  59%|█████▉    | 19/32 [00:47<00:33,  2.55s/it]Importance scoring:  62%|██████▎   | 20/32 [00:50<00:30,  2.55s/it]Importance scoring:  66%|██████▌   | 21/32 [00:52<00:28,  2.55s/it]Importance scoring:  69%|██████▉   | 22/32 [00:55<00:25,  2.54s/it]Importance scoring:  72%|███████▏  | 23/32 [00:57<00:22,  2.54s/it]Importance scoring:  75%|███████▌  | 24/32 [01:00<00:20,  2.54s/it]Importance scoring:  78%|███████▊  | 25/32 [01:02<00:17,  2.54s/it]Importance scoring:  81%|████████▏ | 26/32 [01:05<00:15,  2.53s/it]Importance scoring:  84%|████████▍ | 27/32 [01:07<00:12,  2.53s/it]Importance scoring:  88%|████████▊ | 28/32 [01:10<00:10,  2.53s/it]Importance scoring:  91%|█████████ | 29/32 [01:13<00:07,  2.53s/it]Importance scoring:  94%|█████████▍| 30/32 [01:15<00:05,  2.53s/it]Importance scoring:  97%|█████████▋| 31/32 [01:18<00:02,  2.53s/it]Importance scoring: 100%|██████████| 32/32 [01:20<00:00,  2.52s/it]Importance scoring: 100%|██████████| 32/32 [01:20<00:00,  2.52s/it]
+ratio 0.60 (pair), 5.7 GB (evict 7376833 pairs)
+  -> OK prefill_peak=18.96GB cache=5.70GB compactions=None acc=1.00 | 'Based on the content of the book, the best thing to do in San Francisco is to ea'
+================================================================================ 
+[ctx_len=96000] building NIAH ...
+insertion at 47911
+chunk inputs, size: 4096 (num 24)
+Prefill:   0%|          | 0/24 [00:00<?, ?it/s]Prefill:   4%|▍         | 1/24 [00:00<00:10,  2.26it/s]Prefill:   8%|▊         | 2/24 [00:01<00:17,  1.27it/s]Prefill:  12%|█▎        | 3/24 [00:02<00:20,  1.03it/s]Prefill:  17%|█▋        | 4/24 [00:04<00:22,  1.13s/it]Prefill:  21%|██        | 5/24 [00:05<00:24,  1.28s/it]Prefill:  25%|██▌       | 6/24 [00:07<00:25,  1.44s/it]Prefill:  29%|██▉       | 7/24 [00:09<00:27,  1.61s/it]Prefill:  33%|███▎      | 8/24 [00:11<00:28,  1.78s/it]Prefill:  38%|███▊      | 9/24 [00:13<00:29,  1.94s/it]Prefill:  42%|████▏     | 10/24 [00:16<00:29,  2.09s/it]Prefill:  46%|████▌     | 11/24 [00:19<00:30,  2.38s/it]Prefill:  50%|█████     | 12/24 [00:22<00:33,  2.81s/it]Prefill:  54%|█████▍    | 13/24 [00:24<00:27,  2.52s/it]Prefill:  58%|█████▊    | 14/24 [00:29<00:31,  3.16s/it]Prefill:  62%|██████▎   | 15/24 [00:32<00:27,  3.03s/it]Prefill:  67%|██████▋   | 16/24 [00:35<00:24,  3.00s/it]Prefill:  71%|███████   | 17/24 [00:39<00:23,  3.29s/it]Prefill:  75%|███████▌  | 18/24 [00:44<00:23,  3.93s/it]Prefill:  79%|███████▉  | 19/24 [00:48<00:20,  4.04s/it]Prefill:  83%|████████▎ | 20/24 [00:52<00:15,  3.97s/it]Prefill:  88%|████████▊ | 21/24 [00:57<00:12,  4.29s/it]Prefill:  92%|█████████▏| 22/24 [01:02<00:08,  4.45s/it]Prefill:  96%|█████████▌| 23/24 [01:07<00:04,  4.67s/it]Prefill: 100%|██████████| 24/24 [01:10<00:00,  4.03s/it]Prefill: 100%|██████████| 24/24 [01:10<00:00,  2.93s/it]
+chunk inputs, size: 2000 (num 48)
+Importance scoring:   0%|          | 0/48 [00:00<?, ?it/s]Importance scoring:   0%|          | 0/48 [00:00<?, ?it/s]
+  -> OOM at peak~22.85811456
+  (prefill OOM; stopping ladder for this method)
+
+================================================================================
+SUMMARY (NIAH length ladder)
+    ctx     tok   status  peak_gb   acc
+   8000    7999       ok    10.67  1.00
+  16000   15999       ok    11.85  1.00
+  32000   31999       ok    14.22  1.00
+  64000   63999       ok    18.96  1.00
+  96000   95999      oom    22.86     -
+
+HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=18.962442752GB acc=1.0 | first_oom=96000
+
+[recorded] detail -> results/niah/qwen3-4b_kvzip_per_token_cr0.6_20260527-073624.json
+[recorded] master -> results/niah_runs.jsonl

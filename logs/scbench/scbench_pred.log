@@ -1,0 +1,203 @@
+### sumA-pred-v1 START Thu May 28 17:07:51 UTC 2026
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.27it/s]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.32it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.42it/s]
+
+GPU total ~23.7GB | model=qwen3-4b data=scbench_summary_short method=ours_predict_v1 comp_ratio=0.4 turn_budget=2048
+Replace qwen3 attention with KVzip
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+
+scbench_summary_short loaded, #data: 62
+context tokens=9634 | #questions=1 | turns=100 | B_f=3854 B_turn=385 (ours) | kvzip ratio=0.4
+chunk inputs, size: 2048 (num 5)
+  chunk 0: logical_ctx=2048 phys_ctx=2048 committed=0 working=2048 cache=0.30GB segments=0 reprunes=0
+chunk inputs, size: 2048 (num 2)
+  chunk 1: logical_ctx=4096 phys_ctx=1638 committed=1638 working=0 cache=0.20GB segments=1 reprunes=0
+  chunk 2: logical_ctx=6144 phys_ctx=3686 committed=1638 working=2048 cache=0.50GB segments=1 reprunes=0
+  chunk 3: logical_ctx=8192 phys_ctx=5732 committed=1638 working=4094 cache=0.80GB segments=1 reprunes=0
+chunk inputs, size: 2048 (num 3)
+  chunk 4: logical_ctx=9634 phys_ctx=3276 committed=3276 working=0 cache=0.50GB segments=2 reprunes=0
+chunk inputs, size: 2048 (num 2)
+  [done] peak_phys_ctx=7174 committed=3276 final_cache=0.50GB segments=2 reprunes=0
+context prefilled: peak=10.59GB cache=0.50GB
+  turn 0: cache=0.50GB phys=3342 ctx_turns=38 turn_ratio=0.4 acc=0.55 | 'The paper provides a comprehensive analysis of the'
+  turn 10: cache=0.50GB phys=3662 ctx_turns=358 turn_ratio=0.4 acc=0.42 | 'The paper analyzes the properties of order-divisor'
+  turn 20: cache=0.60GB phys=3982 ctx_turns=678 turn_ratio=0.4 acc=0.45 | 'The paper investigates the properties of order-div'
+  turn 30: cache=0.60GB phys=4302 ctx_turns=998 turn_ratio=0.4 acc=0.42 | 'The paper examines the properties of order-divisor'
+  turn 40: cache=0.70GB phys=4622 ctx_turns=1318 turn_ratio=0.4 acc=0.45 | 'The paper examines the properties of order-divisor'
+  turn 50: cache=0.70GB phys=4942 ctx_turns=1638 turn_ratio=0.4 acc=0.42 | 'The paper studies the properties of order-divisor '
+  turn 60: cache=0.80GB phys=5262 ctx_turns=1958 turn_ratio=0.4 acc=0.42 | 'The paper examines the properties of order-divisor'
+  turn 70: cache=0.80GB phys=5582 ctx_turns=2278 turn_ratio=0.4 acc=0.45 | 'The paper examines the properties of order-divisor'
+  turn 80: cache=0.90GB phys=5902 ctx_turns=2598 turn_ratio=0.4 acc=0.42 | 'The paper examines the properties of order-divisor'
+  turn 90: cache=0.90GB phys=6222 ctx_turns=2918 turn_ratio=0.4 acc=0.42 | 'The paper examines the properties of order-divisor'
+  turn 99: cache=1.00GB phys=6510 ctx_turns=3206 turn_ratio=0.4 acc=0.45 | 'The paper examines the properties of order-divisor'
+
+================================================================================
+SUMMARY: method=ours_predict_v1 survived_turns=100/100 stop=completed max_tokens=17763 mean_acc=0.435 final_cache=1.00GB peak_during_turns=9.07GB
+
+[recorded] detail -> results/scbench/qwen3-4b_ours_per_token_scbench_summary_short_expA_20260528-171141.json
+[recorded] master -> results/scbench_runs.jsonl
+
+### sumA-pred-v2 START Thu May 28 17:11:42 UTC 2026
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.25it/s]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.29it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.38it/s]
+
+GPU total ~23.7GB | model=qwen3-4b data=scbench_summary_short method=ours_predict_v2 comp_ratio=0.4 turn_budget=2048
+Replace qwen3 attention with KVzip
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+
+scbench_summary_short loaded, #data: 62
+context tokens=9634 | #questions=1 | turns=100 | B_f=3854 B_turn=385 (ours) | kvzip ratio=0.4
+chunk inputs, size: 2048 (num 5)
+  chunk 0: logical_ctx=2048 phys_ctx=2048 committed=0 working=2048 cache=0.30GB segments=0 reprunes=0
+chunk inputs, size: 2048 (num 2)
+  chunk 1: logical_ctx=4096 phys_ctx=1638 committed=1638 working=0 cache=0.20GB segments=1 reprunes=0
+  chunk 2: logical_ctx=6144 phys_ctx=3686 committed=1638 working=2048 cache=0.50GB segments=1 reprunes=0
+  chunk 3: logical_ctx=8192 phys_ctx=5732 committed=1638 working=4094 cache=0.80GB segments=1 reprunes=0
+chunk inputs, size: 2048 (num 3)
+  chunk 4: logical_ctx=9634 phys_ctx=3276 committed=3276 working=0 cache=0.50GB segments=2 reprunes=0
+chunk inputs, size: 2048 (num 2)
+  [done] peak_phys_ctx=7174 committed=3276 final_cache=0.50GB segments=2 reprunes=0
+context prefilled: peak=10.59GB cache=0.50GB
+  turn 0: cache=0.50GB phys=3340 ctx_turns=36 turn_ratio=0.4 acc=0.52 | 'The paper provides a comprehensive analysis of the'
+  turn 10: cache=0.50GB phys=3654 ctx_turns=350 turn_ratio=0.4 acc=0.45 | 'The paper examines the properties of order-divisor'
+  turn 20: cache=0.60GB phys=3964 ctx_turns=660 turn_ratio=0.4 acc=0.45 | 'The paper examines the properties of order-divisor'
+  turn 30: cache=0.60GB phys=4274 ctx_turns=970 turn_ratio=0.4 acc=0.42 | 'The paper explores the properties of order-divisor'
+  turn 40: cache=0.70GB phys=4584 ctx_turns=1280 turn_ratio=0.4 acc=0.39 | 'The paper examines the properties of order-divisor'
+  turn 50: cache=0.70GB phys=4894 ctx_turns=1590 turn_ratio=0.4 acc=0.42 | 'The paper investigates the properties of order-div'
+  turn 60: cache=0.80GB phys=5204 ctx_turns=1900 turn_ratio=0.4 acc=0.45 | 'The paper examines the properties of order-divisor'
+  turn 70: cache=0.80GB phys=5514 ctx_turns=2210 turn_ratio=0.4 acc=0.45 | 'The paper examines the properties of order-divisor'
+  turn 80: cache=0.90GB phys=5824 ctx_turns=2520 turn_ratio=0.4 acc=0.45 | 'The paper examines the properties of order-divisor'
+  turn 90: cache=0.90GB phys=6134 ctx_turns=2830 turn_ratio=0.4 acc=0.45 | 'The paper examines the properties of order-divisor'
+  turn 99: cache=0.90GB phys=6413 ctx_turns=3109 turn_ratio=0.4 acc=0.45 | 'The paper investigates the properties of order-div'
+
+================================================================================
+SUMMARY: method=ours_predict_v2 survived_turns=100/100 stop=completed max_tokens=17467 mean_acc=0.440 final_cache=0.90GB peak_during_turns=9.05GB
+
+[recorded] detail -> results/scbench/qwen3-4b_ours_per_token_scbench_summary_short_expA_20260528-171520.json
+[recorded] master -> results/scbench_runs.jsonl
+
+### kvB-pred-v1 START Thu May 28 17:15:21 UTC 2026
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.27it/s]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.30it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.40it/s]
+
+GPU total ~23.7GB | model=qwen3-4b data=scbench_kv_short method=ours_predict_v1 comp_ratio=1.0 turn_budget=2048
+Replace qwen3 attention with KVzip
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+
+scbench_kv_short loaded, #data: 100
+context tokens=24470 | #questions=10 | turns=150 | B_f=24470 B_turn=2447 (ours) | kvzip ratio=1.0
+chunk inputs, size: 2048 (num 12)
+  chunk 0: logical_ctx=2048 phys_ctx=2048 committed=0 working=2048 cache=0.30GB segments=0 reprunes=0
+  chunk 1: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.60GB segments=0 reprunes=0
+  chunk 2: logical_ctx=6144 phys_ctx=6144 committed=0 working=6144 cache=0.90GB segments=0 reprunes=0
+  chunk 3: logical_ctx=8192 phys_ctx=8192 committed=0 working=8192 cache=1.20GB segments=0 reprunes=0
+  chunk 4: logical_ctx=10240 phys_ctx=10240 committed=0 working=10240 cache=1.50GB segments=0 reprunes=0
+  chunk 5: logical_ctx=12288 phys_ctx=12288 committed=0 working=12288 cache=1.80GB segments=0 reprunes=0
+  chunk 6: logical_ctx=14336 phys_ctx=14336 committed=0 working=14336 cache=2.10GB segments=0 reprunes=0
+  chunk 7: logical_ctx=16384 phys_ctx=16384 committed=0 working=16384 cache=2.40GB segments=0 reprunes=0
+  chunk 8: logical_ctx=18432 phys_ctx=18432 committed=0 working=18432 cache=2.70GB segments=0 reprunes=0
+  chunk 9: logical_ctx=20480 phys_ctx=20480 committed=0 working=20480 cache=3.00GB segments=0 reprunes=0
+  chunk 10: logical_ctx=22528 phys_ctx=22528 committed=0 working=22528 cache=3.30GB segments=0 reprunes=0
+  chunk 11: logical_ctx=24470 phys_ctx=24470 committed=0 working=24470 cache=3.60GB segments=0 reprunes=0
+chunk inputs, size: 2048 (num 12)
+chunk inputs, size: 2048 (num 12)
+  [done] peak_phys_ctx=24470 committed=24470 final_cache=3.60GB segments=0 reprunes=0
+context prefilled: peak=13.17GB cache=3.60GB
+  turn 0: cache=3.60GB phys=24549 ctx_turns=51 turn_ratio=0.4 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 10: cache=3.70GB phys=24922 ctx_turns=424 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 20: cache=3.70GB phys=25278 ctx_turns=780 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 30: cache=3.80GB phys=25634 ctx_turns=1136 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 40: cache=3.80GB phys=25990 ctx_turns=1492 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 50: cache=3.90GB phys=26346 ctx_turns=1848 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 60: cache=3.90GB phys=26702 ctx_turns=2204 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 70: cache=4.00GB phys=27058 ctx_turns=2560 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 80: cache=4.00GB phys=27414 ctx_turns=2916 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 90: cache=4.10GB phys=27770 ctx_turns=3272 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 100: cache=4.10GB phys=28126 ctx_turns=3628 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 110: cache=4.20GB phys=28482 ctx_turns=3984 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 120: cache=4.30GB phys=28838 ctx_turns=4340 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 130: cache=4.30GB phys=29194 ctx_turns=4696 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 140: cache=4.40GB phys=29550 ctx_turns=5052 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 149: cache=4.40GB phys=29871 ctx_turns=5373 turn_ratio=0.4 acc=1.00 | '"8d339f3b-260c-4360-9849-af3c72317a78"'
+
+================================================================================
+SUMMARY: method=ours_predict_v1 survived_turns=150/150 stop=completed max_tokens=37915 mean_acc=0.907 final_cache=4.40GB peak_during_turns=12.67GB
+
+[recorded] detail -> results/scbench/qwen3-4b_ours_per_token_scbench_kv_short_expB_20260528-172530.json
+[recorded] master -> results/scbench_runs.jsonl
+
+### kvB-pred-v2 START Thu May 28 17:25:31 UTC 2026
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.30it/s]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.34it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.46it/s]
+
+GPU total ~23.7GB | model=qwen3-4b data=scbench_kv_short method=ours_predict_v2 comp_ratio=1.0 turn_budget=2048
+Replace qwen3 attention with KVzip
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+
+scbench_kv_short loaded, #data: 100
+context tokens=24470 | #questions=10 | turns=150 | B_f=24470 B_turn=2447 (ours) | kvzip ratio=1.0
+chunk inputs, size: 2048 (num 12)
+  chunk 0: logical_ctx=2048 phys_ctx=2048 committed=0 working=2048 cache=0.30GB segments=0 reprunes=0
+  chunk 1: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.60GB segments=0 reprunes=0
+  chunk 2: logical_ctx=6144 phys_ctx=6144 committed=0 working=6144 cache=0.90GB segments=0 reprunes=0
+  chunk 3: logical_ctx=8192 phys_ctx=8192 committed=0 working=8192 cache=1.20GB segments=0 reprunes=0
+  chunk 4: logical_ctx=10240 phys_ctx=10240 committed=0 working=10240 cache=1.50GB segments=0 reprunes=0
+  chunk 5: logical_ctx=12288 phys_ctx=12288 committed=0 working=12288 cache=1.80GB segments=0 reprunes=0
+  chunk 6: logical_ctx=14336 phys_ctx=14336 committed=0 working=14336 cache=2.10GB segments=0 reprunes=0
+  chunk 7: logical_ctx=16384 phys_ctx=16384 committed=0 working=16384 cache=2.40GB segments=0 reprunes=0
+  chunk 8: logical_ctx=18432 phys_ctx=18432 committed=0 working=18432 cache=2.70GB segments=0 reprunes=0
+  chunk 9: logical_ctx=20480 phys_ctx=20480 committed=0 working=20480 cache=3.00GB segments=0 reprunes=0
+  chunk 10: logical_ctx=22528 phys_ctx=22528 committed=0 working=22528 cache=3.30GB segments=0 reprunes=0
+  chunk 11: logical_ctx=24470 phys_ctx=24470 committed=0 working=24470 cache=3.60GB segments=0 reprunes=0
+chunk inputs, size: 2048 (num 12)
+chunk inputs, size: 2048 (num 12)
+  [done] peak_phys_ctx=24470 committed=24470 final_cache=3.60GB segments=0 reprunes=0
+context prefilled: peak=13.17GB cache=3.60GB
+  turn 0: cache=3.60GB phys=24549 ctx_turns=51 turn_ratio=0.4 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 10: cache=3.70GB phys=24922 ctx_turns=424 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 20: cache=3.70GB phys=25278 ctx_turns=780 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 30: cache=3.80GB phys=25634 ctx_turns=1136 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 40: cache=3.80GB phys=25990 ctx_turns=1492 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 50: cache=3.90GB phys=26346 ctx_turns=1848 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 60: cache=3.90GB phys=26702 ctx_turns=2204 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 70: cache=4.00GB phys=27058 ctx_turns=2560 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 80: cache=4.00GB phys=27414 ctx_turns=2916 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 90: cache=4.10GB phys=27770 ctx_turns=3272 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 100: cache=4.10GB phys=28126 ctx_turns=3628 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 110: cache=4.20GB phys=28482 ctx_turns=3984 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 120: cache=4.30GB phys=28838 ctx_turns=4340 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 130: cache=4.30GB phys=29194 ctx_turns=4696 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 140: cache=4.40GB phys=29550 ctx_turns=5052 turn_ratio=0.4 acc=1.00 | '"cb59052b-9128-4979-9c0e-e1de4adcf73b"'
+  turn 149: cache=4.40GB phys=29871 ctx_turns=5373 turn_ratio=0.4 acc=1.00 | '"8d339f3b-260c-4360-9849-af3c72317a78"'
+
+================================================================================
+SUMMARY: method=ours_predict_v2 survived_turns=150/150 stop=completed max_tokens=37901 mean_acc=0.907 final_cache=4.40GB peak_during_turns=12.67GB
+
+[recorded] detail -> results/scbench/qwen3-4b_ours_per_token_scbench_kv_short_expB_20260528-173537.json
+[recorded] master -> results/scbench_runs.jsonl
+
+### PRED DONE Thu May 28 17:35:38 UTC 2026

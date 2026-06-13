@@ -7,15 +7,10 @@ build/
 dist/
 .ipynb_checkpoints/
 
-# experiment outputs (regenerable; commit with `git add -f` if you want to keep them)
-results/
-results_niah/
-results_scbench/
-
-# misc
-*.log
+# env / editor noise
 .venv/
 .DS_Store
 
-RESULTS_NOTES.md
-SETUP.md
+# NOTE: experiment outputs (results/, *.log) and project docs (RESULTS_NOTES.md,
+# SETUP.md) are intentionally tracked so the repository captures the full
+# experiment record alongside the code.

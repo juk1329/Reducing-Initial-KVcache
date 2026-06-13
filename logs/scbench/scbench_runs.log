@@ -1,0 +1,403 @@
+### A-kvzip START Thu May 28 13:34:10 UTC 2026
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.28it/s]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.30it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.39it/s]
+
+Prefill:   0%|          | 0/5 [00:00<?, ?it/s]
+Prefill:  20%|██        | 1/5 [00:00<00:01,  2.08it/s]
+Prefill:  40%|████      | 2/5 [00:00<00:01,  2.30it/s]
+Prefill:  60%|██████    | 3/5 [00:01<00:00,  2.27it/s]
+Prefill:  80%|████████  | 4/5 [00:01<00:00,  2.17it/s]
+Prefill: 100%|██████████| 5/5 [00:02<00:00,  2.17it/s]
+Prefill: 100%|██████████| 5/5 [00:02<00:00,  2.19it/s]
+
+Importance scoring:   0%|          | 0/5 [00:00<?, ?it/s]
+Importance scoring:  20%|██        | 1/5 [00:00<00:02,  1.36it/s]
+Importance scoring:  40%|████      | 2/5 [00:01<00:03,  1.05s/it]
+Importance scoring:  60%|██████    | 3/5 [00:03<00:02,  1.15s/it]
+Importance scoring:  80%|████████  | 4/5 [00:04<00:01,  1.19s/it]
+Importance scoring: 100%|██████████| 5/5 [00:05<00:00,  1.15s/it]
+Importance scoring: 100%|██████████| 5/5 [00:05<00:00,  1.12s/it]
+
+GPU total ~23.7GB | model=qwen3-4b data=scbench_summary_short method=kvzip comp_ratio=0.4 turn_budget=2048
+Replace qwen3 attention with KVzip
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+
+scbench_summary_short loaded, #data: 62
+context tokens=9634 | #questions=1 | turns=100 | B_f=8192 B_turn=819 (ours) | kvzip ratio=0.4
+chunk inputs, size: 2048 (num 5)
+chunk inputs, size: 2000 (num 5)
+ratio 0.40 (pair), 0.6 GB (evict 1665861 pairs)
+context prefilled: peak=10.91GB cache=0.60GB
+  turn 0: cache=0.60GB phys=9742 acc=0.55 | 'The paper investigates the properties of order-div'
+  turn 10: cache=0.70GB phys=10551 acc=0.48 | 'The paper analyzes the properties of order-divisor'
+  turn 20: cache=0.80GB phys=11357 acc=0.52 | 'The paper explores the structural properties of or'
+  turn 30: cache=0.90GB phys=12158 acc=0.48 | 'The paper analyzes the properties of order-divisor'
+  turn 40: cache=1.10GB phys=12958 acc=0.48 | 'The paper examines the properties of order-divisor'
+  turn 50: cache=1.20GB phys=13758 acc=0.48 | 'The paper analyzes the properties of order-divisor'
+  turn 60: cache=1.30GB phys=14558 acc=0.48 | 'The paper examines the properties of order-divisor'
+  turn 70: cache=1.40GB phys=15358 acc=0.48 | 'The paper analyzes the properties of order-divisor'
+  turn 80: cache=1.50GB phys=16158 acc=0.48 | 'The paper examines the properties of order-divisor'
+  turn 90: cache=1.60GB phys=16958 acc=0.48 | 'The paper analyzes the properties of order-divisor'
+  turn 99: cache=1.80GB phys=17678 acc=0.48 | 'The paper investigates the properties of order-div'
+
+================================================================================
+SUMMARY: method=kvzip survived_turns=100/100 stop=completed max_tokens=17678 mean_acc=0.487 final_cache=1.80GB peak_during_turns=9.86GB
+
+[recorded] detail -> results/scbench/qwen3-4b_kvzip_per_token_scbench_summary_short_expA_20260528-133815.json
+[recorded] master -> results/scbench_runs.jsonl
+
+### A-ours START Thu May 28 13:38:16 UTC 2026
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.30it/s]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.32it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.43it/s]
+
+GPU total ~23.7GB | model=qwen3-4b data=scbench_summary_short method=ours comp_ratio=0.4 turn_budget=2048
+Replace qwen3 attention with KVzip
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+
+scbench_summary_short loaded, #data: 62
+context tokens=9634 | #questions=1 | turns=100 | B_f=3854 B_turn=385 (ours) | kvzip ratio=0.4
+chunk inputs, size: 2048 (num 5)
+  chunk 0: logical_ctx=2048 phys_ctx=2048 committed=0 working=2048 cache=0.30GB segments=0 reprunes=0
+  chunk 1: logical_ctx=4096 phys_ctx=4095 committed=0 working=4095 cache=0.60GB segments=0 reprunes=0
+chunk inputs, size: 2048 (num 3)
+  chunk 2: logical_ctx=6144 phys_ctx=1638 committed=1638 working=0 cache=0.20GB segments=1 reprunes=0
+  chunk 3: logical_ctx=8192 phys_ctx=3685 committed=1638 working=2047 cache=0.50GB segments=1 reprunes=0
+  chunk 4: logical_ctx=9634 phys_ctx=5127 committed=1638 working=3489 cache=0.80GB segments=1 reprunes=0
+chunk inputs, size: 2048 (num 2)
+  [done] peak_phys_ctx=6143 committed=3854 final_cache=0.60GB segments=1 reprunes=1
+context prefilled: peak=10.46GB cache=0.60GB
+  turn 0: cache=0.60GB phys=3970 ctx_turns=88/cap7708 reprunes=0 acc=0.74 | 'The paper provides a comprehensive analysis of the'
+  turn 10: cache=0.70GB phys=4765 ctx_turns=883/cap7708 reprunes=0 acc=0.45 | 'The paper provides a detailed study of order-divis'
+  turn 20: cache=0.80GB phys=5561 ctx_turns=1679/cap7708 reprunes=0 acc=0.45 | 'The paper provides a detailed investigation into t'
+  turn 30: cache=0.90GB phys=6355 ctx_turns=2473/cap7708 reprunes=0 acc=0.48 | 'The paper provides a comprehensive study of order-'
+  turn 40: cache=1.10GB phys=7152 ctx_turns=3270/cap7708 reprunes=0 acc=0.48 | 'The paper provides a detailed analysis of order-di'
+  turn 50: cache=1.20GB phys=7948 ctx_turns=4066/cap7708 reprunes=0 acc=0.48 | 'The paper provides a detailed analysis of order-di'
+  turn 60: cache=1.30GB phys=8744 ctx_turns=4862/cap7708 reprunes=0 acc=0.45 | 'The paper provides a detailed study of order-divis'
+  turn 70: cache=1.40GB phys=9540 ctx_turns=5658/cap7708 reprunes=0 acc=0.45 | 'The paper provides a detailed study of order-divis'
+  turn 80: cache=1.50GB phys=10336 ctx_turns=6454/cap7708 reprunes=0 acc=0.48 | 'The paper provides a comprehensive study of order-'
+  turn 90: cache=1.60GB phys=11135 ctx_turns=7253/cap7708 reprunes=0 acc=0.48 | 'The paper provides a detailed analysis of order-di'
+chunk inputs, size: 2048 (num 4)
+chunk inputs, size: 2048 (num 4)
+chunk inputs, size: 2048 (num 4)
+chunk inputs, size: 2048 (num 4)
+  turn 99: cache=1.70GB phys=11590 ctx_turns=7708/cap7708 reprunes=4 acc=0.42 | 'The paper investigates the properties of order-div'
+
+================================================================================
+SUMMARY: method=ours survived_turns=100/100 stop=completed max_tokens=17631 mean_acc=0.463 final_cache=1.70GB peak_during_turns=11.27GB
+
+[recorded] detail -> results/scbench/qwen3-4b_ours_per_token_scbench_summary_short_expA_20260528-134246.json
+[recorded] master -> results/scbench_runs.jsonl
+
+### A-combine START Thu May 28 13:42:47 UTC 2026
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.30it/s]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.34it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.45it/s]
+
+GPU total ~23.7GB | model=qwen3-4b data=scbench_summary_short method=ours_combine comp_ratio=0.4 turn_budget=2048
+Replace qwen3 attention with KVzip
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+
+scbench_summary_short loaded, #data: 62
+context tokens=9634 | #questions=1 | turns=100 | B_f=3854 B_turn=385 (ours) | kvzip ratio=0.4
+chunk inputs, size: 2048 (num 5)
+  chunk 0: logical_ctx=2048 phys_ctx=2048 committed=0 working=2048 cache=0.30GB segments=0 reprunes=0
+chunk inputs, size: 2048 (num 2)
+  chunk 1: logical_ctx=4096 phys_ctx=1638 committed=1638 working=0 cache=0.20GB segments=1 reprunes=0
+  chunk 2: logical_ctx=6144 phys_ctx=3681 committed=1638 working=2043 cache=0.50GB segments=1 reprunes=0
+  chunk 3: logical_ctx=8192 phys_ctx=5716 committed=1638 working=4078 cache=0.80GB segments=1 reprunes=0
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  chunk 4: logical_ctx=9634 phys_ctx=3276 committed=3276 working=0 cache=0.50GB segments=2 reprunes=0
+chunk inputs, size: 2048 (num 2)
+  [done] peak_phys_ctx=7158 committed=3276 final_cache=0.50GB segments=2 reprunes=0
+context prefilled: peak=10.67GB cache=0.50GB
+  turn 0: cache=0.50GB phys=3398 ctx_turns=94/cap7708 reprunes=0 acc=0.55 | 'The paper provides a comprehensive analysis of the'
+  turn 10: cache=0.60GB phys=4180 ctx_turns=876/cap7708 reprunes=0 acc=0.45 | 'The paper explores the properties of order-divisor'
+  turn 20: cache=0.70GB phys=4974 ctx_turns=1670/cap7708 reprunes=0 acc=0.45 | 'The paper investigates the properties of order-div'
+  turn 30: cache=0.90GB phys=5792 ctx_turns=2488/cap7708 reprunes=0 acc=0.45 | 'The paper investigates the properties of order-div'
+  turn 40: cache=1.00GB phys=6612 ctx_turns=3308/cap7708 reprunes=0 acc=0.45 | 'The paper examines the properties of order-divisor'
+  turn 50: cache=1.10GB phys=7432 ctx_turns=4128/cap7708 reprunes=0 acc=0.45 | 'The paper investigates the properties of order-div'
+  turn 60: cache=1.20GB phys=8252 ctx_turns=4948/cap7708 reprunes=0 acc=0.45 | 'The paper examines the properties of order-divisor'
+  turn 70: cache=1.30GB phys=9072 ctx_turns=5768/cap7708 reprunes=0 acc=0.45 | 'The paper investigates the properties of order-div'
+  turn 80: cache=1.50GB phys=9892 ctx_turns=6588/cap7708 reprunes=0 acc=0.45 | 'The paper examines the properties of order-divisor'
+  turn 90: cache=1.60GB phys=10712 ctx_turns=7408/cap7708 reprunes=0 acc=0.45 | 'The paper investigates the properties of order-div'
+chunk inputs, size: 2048 (num 4)
+chunk inputs, size: 2048 (num 4)
+chunk inputs, size: 2048 (num 4)
+chunk inputs, size: 2048 (num 4)
+chunk inputs, size: 2048 (num 4)
+chunk inputs, size: 2048 (num 4)
+  turn 99: cache=1.60GB phys=11012 ctx_turns=7708/cap7708 reprunes=6 acc=0.48 | 'The paper provides a detailed study of the propert'
+
+================================================================================
+SUMMARY: method=ours_combine survived_turns=100/100 stop=completed max_tokens=17810 mean_acc=0.479 final_cache=1.60GB peak_during_turns=11.18GB
+
+[recorded] detail -> results/scbench/qwen3-4b_ours_per_token_scbench_summary_short_expA_20260528-134754.json
+[recorded] master -> results/scbench_runs.jsonl
+
+### B-kvzip START Thu May 28 13:47:55 UTC 2026
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.29it/s]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.33it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.44it/s]
+
+Prefill:   0%|          | 0/12 [00:00<?, ?it/s]
+Prefill:   8%|▊         | 1/12 [00:00<00:05,  2.15it/s]
+Prefill:  17%|█▋        | 2/12 [00:00<00:04,  2.26it/s]
+Prefill:  25%|██▌       | 3/12 [00:01<00:04,  2.15it/s]
+Prefill:  33%|███▎      | 4/12 [00:01<00:03,  2.06it/s]
+Prefill:  42%|████▏     | 5/12 [00:02<00:03,  1.91it/s]
+Prefill:  50%|█████     | 6/12 [00:03<00:03,  1.81it/s]
+Prefill:  58%|█████▊    | 7/12 [00:03<00:02,  1.69it/s]
+Prefill:  67%|██████▋   | 8/12 [00:04<00:02,  1.58it/s]
+Prefill:  75%|███████▌  | 9/12 [00:05<00:02,  1.49it/s]
+Prefill:  83%|████████▎ | 10/12 [00:06<00:01,  1.40it/s]
+Prefill:  92%|█████████▏| 11/12 [00:06<00:00,  1.32it/s]
+Prefill: 100%|██████████| 12/12 [00:07<00:00,  1.25it/s]
+Prefill: 100%|██████████| 12/12 [00:07<00:00,  1.54it/s]
+
+Importance scoring:   0%|          | 0/13 [00:00<?, ?it/s]
+Importance scoring:   8%|▊         | 1/13 [00:01<00:17,  1.43s/it]
+Importance scoring:  15%|█▌        | 2/13 [00:02<00:15,  1.40s/it]
+Importance scoring:  23%|██▎       | 3/13 [00:04<00:15,  1.52s/it]
+Importance scoring:  31%|███       | 4/13 [00:06<00:14,  1.57s/it]
+Importance scoring:  38%|███▊      | 5/13 [00:07<00:12,  1.60s/it]
+Importance scoring:  46%|████▌     | 6/13 [00:09<00:11,  1.62s/it]
+Importance scoring:  54%|█████▍    | 7/13 [00:11<00:09,  1.63s/it]
+Importance scoring:  62%|██████▏   | 8/13 [00:12<00:08,  1.64s/it]
+Importance scoring:  69%|██████▉   | 9/13 [00:14<00:06,  1.65s/it]
+Importance scoring:  77%|███████▋  | 10/13 [00:16<00:04,  1.65s/it]
+Importance scoring:  85%|████████▍ | 11/13 [00:17<00:03,  1.66s/it]
+Importance scoring:  92%|█████████▏| 12/13 [00:19<00:01,  1.66s/it]
+Importance scoring: 100%|██████████| 13/13 [00:20<00:00,  1.43s/it]
+Importance scoring: 100%|██████████| 13/13 [00:20<00:00,  1.56s/it]
+
+GPU total ~23.7GB | model=qwen3-4b data=scbench_kv_short method=kvzip comp_ratio=1.0 turn_budget=2048
+Replace qwen3 attention with KVzip
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+
+scbench_kv_short loaded, #data: 100
+context tokens=24470 | #questions=10 | turns=150 | B_f=8192 B_turn=819 (ours) | kvzip ratio=1.0
+chunk inputs, size: 2048 (num 12)
+chunk inputs, size: 2000 (num 13)
+ratio 1.00 (pair), 3.6 GB (evict 0 pairs)
+context prefilled: peak=13.11GB cache=3.60GB
+  turn 0: cache=3.60GB phys=24625 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 10: cache=3.80GB phys=25925 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 20: cache=4.00GB phys=27225 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 30: cache=4.20GB phys=28525 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 40: cache=4.40GB phys=29825 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 50: cache=4.60GB phys=31125 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 60: cache=4.80GB phys=32425 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 70: cache=5.00GB phys=33725 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 80: cache=5.20GB phys=35025 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 90: cache=5.40GB phys=36325 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 100: cache=5.50GB phys=37625 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 110: cache=5.70GB phys=38925 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 120: cache=5.90GB phys=40225 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 130: cache=6.10GB phys=41525 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 140: cache=6.30GB phys=42825 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 149: cache=6.50GB phys=43998 acc=1.00 | 'The key associated with the value "96945afe-fded-4'
+
+================================================================================
+SUMMARY: method=kvzip survived_turns=150/150 stop=completed max_tokens=43998 mean_acc=1.000 final_cache=6.50GB peak_during_turns=14.66GB
+
+[recorded] detail -> results/scbench/qwen3-4b_kvzip_per_token_scbench_kv_short_expB_20260528-140810.json
+[recorded] master -> results/scbench_runs.jsonl
+
+### B-ours START Thu May 28 14:08:11 UTC 2026
+GPU total ~23.7GB | model=qwen3-4b data=scbench_kv_short method=ours comp_ratio=1.0 turn_budget=2048
+Replace qwen3 attention with KVzip
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+
+scbench_kv_short loaded, #data: 100
+context tokens=24470 | #questions=10 | turns=150 | B_f=24470 B_turn=2447 (ours) | kvzip ratio=1.0
+chunk inputs, size: 2048 (num 12)
+  chunk 0: logical_ctx=2048 phys_ctx=2048 committed=0 working=2048 cache=0.30GB segments=0 reprunes=0
+  chunk 1: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.60GB segments=0 reprunes=0
+  chunk 2: logical_ctx=6144 phys_ctx=6144 committed=0 working=6144 cache=0.90GB segments=0 reprunes=0
+  chunk 3: logical_ctx=8192 phys_ctx=8192 committed=0 working=8192 cache=1.20GB segments=0 reprunes=0
+  chunk 4: logical_ctx=10240 phys_ctx=10240 committed=0 working=10240 cache=1.50GB segments=0 reprunes=0
+  chunk 5: logical_ctx=12288 phys_ctx=12288 committed=0 working=12288 cache=1.80GB segments=0 reprunes=0
+  chunk 6: logical_ctx=14336 phys_ctx=14336 committed=0 working=14336 cache=2.10GB segments=0 reprunes=0
+  chunk 7: logical_ctx=16384 phys_ctx=16384 committed=0 working=16384 cache=2.40GB segments=0 reprunes=0
+  chunk 8: logical_ctx=18432 phys_ctx=18432 committed=0 working=18432 cache=2.70GB segments=0 reprunes=0
+  chunk 9: logical_ctx=20480 phys_ctx=20480 committed=0 working=20480 cache=3.00GB segments=0 reprunes=0
+  chunk 10: logical_ctx=22528 phys_ctx=22528 committed=0 working=22528 cache=3.30GB segments=0 reprunes=0
+  chunk 11: logical_ctx=24470 phys_ctx=24470 committed=0 working=24470 cache=3.60GB segments=0 reprunes=0
+chunk inputs, size: 2048 (num 12)
+  [done] peak_phys_ctx=24470 committed=24470 final_cache=3.60GB segments=0 reprunes=0
+context prefilled: peak=13.17GB cache=3.60GB
+  turn 0: cache=3.60GB phys=24625 ctx_turns=127/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 10: cache=3.80GB phys=25925 ctx_turns=1427/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 20: cache=4.00GB phys=27225 ctx_turns=2727/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 30: cache=4.20GB phys=28525 ctx_turns=4027/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 40: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=10 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 50: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=20 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 60: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=30 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 70: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=40 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 80: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=50 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 90: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=60 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 100: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=70 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 110: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=80 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 120: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=90 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 130: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=100 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 140: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=110 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 149: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=119 acc=1.00 | 'The key associated with the value "96945afe-fded-4'
+
+================================================================================
+SUMMARY: method=ours survived_turns=150/150 stop=completed max_tokens=44092 mean_acc=1.000 final_cache=4.20GB peak_during_turns=13.80GB
+
+[recorded] detail -> results/scbench/qwen3-4b_ours_per_token_scbench_kv_short_expB_20260528-143541.json
+[recorded] master -> results/scbench_runs.jsonl
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.28it/s]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.33it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.44it/s]
+
+
+### B-combine START Thu May 28 14:35:42 UTC 2026

@@ -1,0 +1,11 @@
+model,data,method,method_variant,comp_ratio,B_f,turn_budget,ctx_tokens,survived_turns,n_turns_requested,completed_all,stop_reason,max_tokens_processed,turn_ratio,turn_cap,n_turn_reprunes,mean_acc,prefill_peak_gb,peak_during_turns_gb,final_cache_gb,cache_gb_turn0,cache_gb_last,cache_growth_gb_per_turn
+qwen3-4b,scbench_summary_short,kvzip,kvzip,0.4,8192,2048,9634,100,100,True,completed,17678,,,,0.4874,10.910671872,9.863248896,1.8,0.6,1.8,0.01212
+qwen3-4b,scbench_kv_short,kvzip,kvzip,1.0,8192,2048,24470,150,150,True,completed,43998,,,,1.0,13.10861056,14.658729472,6.5,3.6,6.5,0.01946
+qwen3-4b,scbench_summary_short,ours,ours,0.4,3854,2048,9634,100,100,True,completed,17303,0.4,,0,0.53,10.456039936,9.136823296,1.0,0.6,1.0,0.00404
+qwen3-4b,scbench_summary_short,ours,ours_combine,0.4,3854,2048,9634,100,100,True,completed,16771,0.4,,0,0.4484,10.668026368,9.013502976,0.9,0.5,0.9,0.00404
+qwen3-4b,scbench_kv_short,ours,ours,1.0,24470,2048,24470,150,150,True,completed,43998,0.4,,0,1.0,13.167468032,13.099998208,4.8,3.6,4.8,0.00805
+qwen3-4b,scbench_kv_short,ours,ours_combine,1.0,24470,2048,24470,150,150,True,completed,43998,0.4,,0,1.0,13.168399872,13.099759616,4.8,3.6,4.8,0.00805
+qwen3-4b,scbench_summary_short,ours,ours_predict_v1,0.4,3854,2048,9634,100,100,True,completed,17763,0.4,,0,0.4352,10.593849856,9.066805248,1.0,0.5,1.0,0.00505
+qwen3-4b,scbench_summary_short,ours,ours_predict_v2,0.4,3854,2048,9634,100,100,True,completed,17467,0.4,,0,0.4397,10.593849856,9.051936768,0.9,0.5,0.9,0.00404
+qwen3-4b,scbench_kv_short,ours,ours_predict_v1,1.0,24470,2048,24470,150,150,True,completed,37915,0.4,,0,0.9067,13.166515712,12.669110272,4.4,3.6,4.4,0.00537
+qwen3-4b,scbench_kv_short,ours,ours_predict_v2,1.0,24470,2048,24470,150,150,True,completed,37901,0.4,,0,0.9067,13.166515712,12.669110272,4.4,3.6,4.4,0.00537

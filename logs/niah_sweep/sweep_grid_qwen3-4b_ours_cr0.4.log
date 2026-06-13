@@ -1,0 +1,181 @@
+GPU total ~23.7GB | model=qwen3-4b method=ours level=per_token comp_ratio=0.4 (final_budget=round(r*L), B_i/working_max derived) chunk=4096
+Replace qwen3 attention with KVzip
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.54it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.48it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.69it/s]
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+================================================================================ 
+[ctx_len=8000] building NIAH ...
+Token indices sequence length is longer than the specified maximum sequence length for this model (149704 > 131072). Running this sequence through the model will result in indexing errors
+insertion at 3983
+chunk inputs, size: 4096 (num 2)
+  chunk 0: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.60GB segments=0 reprunes=0
+  chunk 1: logical_ctx=7999 phys_ctx=7999 committed=0 working=7999 cache=1.20GB segments=0 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  [done] peak_phys_ctx=7999 committed=3200 final_cache=0.50GB segments=0 reprunes=1
+  -> OK prefill_peak=14.37GB cache=0.50GB compactions=1 acc=1.00 | 'The best thing to do in San Francisco is eat a sandwich and sit in Dolores Park '
+================================================================================ 
+[ctx_len=16000] building NIAH ...
+insertion at 7973
+chunk inputs, size: 4096 (num 4)
+  chunk 0: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.60GB segments=0 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 1: logical_ctx=8192 phys_ctx=3277 committed=3277 working=0 cache=0.50GB segments=1 reprunes=0
+  chunk 2: logical_ctx=12288 phys_ctx=7373 committed=3277 working=4096 cache=1.10GB segments=1 reprunes=0
+  chunk 3: logical_ctx=15999 phys_ctx=11084 committed=3277 working=7807 cache=1.60GB segments=1 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  [done] peak_phys_ctx=11084 committed=6400 final_cache=0.90GB segments=1 reprunes=1
+  -> OK prefill_peak=14.82GB cache=0.90GB compactions=2 acc=1.00 | 'The best thing to do in San Francisco is eat a sandwich and sit in Dolores Park '
+================================================================================ 
+[ctx_len=32000] building NIAH ...
+insertion at 15980
+chunk inputs, size: 4096 (num 8)
+  chunk 0: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.60GB segments=0 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 1: logical_ctx=8192 phys_ctx=3277 committed=3277 working=0 cache=0.50GB segments=1 reprunes=0
+  chunk 2: logical_ctx=12288 phys_ctx=7373 committed=3277 working=4096 cache=1.10GB segments=1 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 3: logical_ctx=16384 phys_ctx=6554 committed=6554 working=0 cache=1.00GB segments=2 reprunes=0
+  chunk 4: logical_ctx=20480 phys_ctx=10650 committed=6554 working=4096 cache=1.60GB segments=2 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 5: logical_ctx=24576 phys_ctx=9831 committed=9831 working=0 cache=1.50GB segments=3 reprunes=0
+  chunk 6: logical_ctx=28672 phys_ctx=13927 committed=9831 working=4096 cache=2.10GB segments=3 reprunes=0
+  chunk 7: logical_ctx=31999 phys_ctx=17254 committed=9831 working=7423 cache=2.50GB segments=3 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  [done] peak_phys_ctx=17254 committed=12800 final_cache=1.90GB segments=3 reprunes=1
+  -> OK prefill_peak=15.74GB cache=1.90GB compactions=4 acc=1.00 | 'Eat a sandwich and sit in Dolores Park on a sunny day.'
+================================================================================ 
+[ctx_len=64000] building NIAH ...
+insertion at 31959
+chunk inputs, size: 4096 (num 16)
+  chunk 0: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.60GB segments=0 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 1: logical_ctx=8192 phys_ctx=3277 committed=3277 working=0 cache=0.50GB segments=1 reprunes=0
+  chunk 2: logical_ctx=12288 phys_ctx=7373 committed=3277 working=4096 cache=1.10GB segments=1 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 3: logical_ctx=16384 phys_ctx=6554 committed=6554 working=0 cache=1.00GB segments=2 reprunes=0
+  chunk 4: logical_ctx=20480 phys_ctx=10650 committed=6554 working=4096 cache=1.60GB segments=2 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 5: logical_ctx=24576 phys_ctx=9831 committed=9831 working=0 cache=1.50GB segments=3 reprunes=0
+  chunk 6: logical_ctx=28672 phys_ctx=13927 committed=9831 working=4096 cache=2.10GB segments=3 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 7: logical_ctx=32768 phys_ctx=13108 committed=13108 working=0 cache=1.90GB segments=4 reprunes=0
+  chunk 8: logical_ctx=36864 phys_ctx=17204 committed=13108 working=4096 cache=2.50GB segments=4 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 9: logical_ctx=40960 phys_ctx=16385 committed=16385 working=0 cache=2.40GB segments=5 reprunes=0
+  chunk 10: logical_ctx=45056 phys_ctx=20481 committed=16385 working=4096 cache=3.00GB segments=5 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 11: logical_ctx=49152 phys_ctx=19662 committed=19662 working=0 cache=2.90GB segments=6 reprunes=0
+  chunk 12: logical_ctx=53248 phys_ctx=23758 committed=19662 working=4096 cache=3.50GB segments=6 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 13: logical_ctx=57344 phys_ctx=22939 committed=22939 working=0 cache=3.40GB segments=7 reprunes=0
+  chunk 14: logical_ctx=61440 phys_ctx=27035 committed=22939 working=4096 cache=4.00GB segments=7 reprunes=0
+  chunk 15: logical_ctx=63999 phys_ctx=29594 committed=22939 working=6655 cache=4.40GB segments=7 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  [done] peak_phys_ctx=29594 committed=25600 final_cache=3.80GB segments=7 reprunes=1
+  -> OK prefill_peak=17.56GB cache=3.80GB compactions=8 acc=1.00 | 'Based on the content of the book, the best thing to do in San Francisco is: eat '
+================================================================================ 
+[ctx_len=96000] building NIAH ...
+insertion at 47911
+chunk inputs, size: 4096 (num 24)
+  chunk 0: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.60GB segments=0 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 1: logical_ctx=8192 phys_ctx=3277 committed=3277 working=0 cache=0.50GB segments=1 reprunes=0
+  chunk 2: logical_ctx=12288 phys_ctx=7373 committed=3277 working=4096 cache=1.10GB segments=1 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 3: logical_ctx=16384 phys_ctx=6554 committed=6554 working=0 cache=1.00GB segments=2 reprunes=0
+  chunk 4: logical_ctx=20480 phys_ctx=10650 committed=6554 working=4096 cache=1.60GB segments=2 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 5: logical_ctx=24576 phys_ctx=9831 committed=9831 working=0 cache=1.50GB segments=3 reprunes=0
+  chunk 6: logical_ctx=28672 phys_ctx=13927 committed=9831 working=4096 cache=2.10GB segments=3 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 7: logical_ctx=32768 phys_ctx=13108 committed=13108 working=0 cache=1.90GB segments=4 reprunes=0
+  chunk 8: logical_ctx=36864 phys_ctx=17204 committed=13108 working=4096 cache=2.50GB segments=4 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 9: logical_ctx=40960 phys_ctx=16385 committed=16385 working=0 cache=2.40GB segments=5 reprunes=0
+  chunk 10: logical_ctx=45056 phys_ctx=20481 committed=16385 working=4096 cache=3.00GB segments=5 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 11: logical_ctx=49152 phys_ctx=19662 committed=19662 working=0 cache=2.90GB segments=6 reprunes=0
+  chunk 12: logical_ctx=53248 phys_ctx=23758 committed=19662 working=4096 cache=3.50GB segments=6 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 13: logical_ctx=57344 phys_ctx=22939 committed=22939 working=0 cache=3.40GB segments=7 reprunes=0
+  chunk 14: logical_ctx=61440 phys_ctx=27035 committed=22939 working=4096 cache=4.00GB segments=7 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 15: logical_ctx=65536 phys_ctx=26216 committed=26216 working=0 cache=3.90GB segments=8 reprunes=0
+  chunk 16: logical_ctx=69632 phys_ctx=30312 committed=26216 working=4096 cache=4.50GB segments=8 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 17: logical_ctx=73728 phys_ctx=29493 committed=29493 working=0 cache=4.40GB segments=9 reprunes=0
+  chunk 18: logical_ctx=77824 phys_ctx=33589 committed=29493 working=4096 cache=5.00GB segments=9 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 19: logical_ctx=81920 phys_ctx=32770 committed=32770 working=0 cache=4.80GB segments=10 reprunes=0
+  chunk 20: logical_ctx=86016 phys_ctx=36866 committed=32770 working=4096 cache=5.40GB segments=10 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 21: logical_ctx=90112 phys_ctx=36047 committed=36047 working=0 cache=5.30GB segments=11 reprunes=0
+  chunk 22: logical_ctx=94208 phys_ctx=40143 committed=36047 working=4096 cache=5.90GB segments=11 reprunes=0
+  chunk 23: logical_ctx=95999 phys_ctx=41934 committed=36047 working=5887 cache=6.20GB segments=11 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  [done] peak_phys_ctx=41934 committed=38400 final_cache=5.70GB segments=11 reprunes=1
+  -> OK prefill_peak=19.39GB cache=5.70GB compactions=12 acc=1.00 | 'Based on the content of the book, the best thing to do in San Francisco is eat a'
+================================================================================ 
+[ctx_len=120000] building NIAH ...
+insertion at 59976
+chunk inputs, size: 4096 (num 30)
+  chunk 0: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.60GB segments=0 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 1: logical_ctx=8192 phys_ctx=3277 committed=3277 working=0 cache=0.50GB segments=1 reprunes=0
+  chunk 2: logical_ctx=12288 phys_ctx=7373 committed=3277 working=4096 cache=1.10GB segments=1 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 3: logical_ctx=16384 phys_ctx=6554 committed=6554 working=0 cache=1.00GB segments=2 reprunes=0
+  chunk 4: logical_ctx=20480 phys_ctx=10650 committed=6554 working=4096 cache=1.60GB segments=2 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 5: logical_ctx=24576 phys_ctx=9831 committed=9831 working=0 cache=1.50GB segments=3 reprunes=0
+  chunk 6: logical_ctx=28672 phys_ctx=13927 committed=9831 working=4096 cache=2.10GB segments=3 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 7: logical_ctx=32768 phys_ctx=13108 committed=13108 working=0 cache=1.90GB segments=4 reprunes=0
+  chunk 8: logical_ctx=36864 phys_ctx=17204 committed=13108 working=4096 cache=2.50GB segments=4 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 9: logical_ctx=40960 phys_ctx=16385 committed=16385 working=0 cache=2.40GB segments=5 reprunes=0
+  chunk 10: logical_ctx=45056 phys_ctx=20481 committed=16385 working=4096 cache=3.00GB segments=5 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 11: logical_ctx=49152 phys_ctx=19662 committed=19662 working=0 cache=2.90GB segments=6 reprunes=0
+  chunk 12: logical_ctx=53248 phys_ctx=23758 committed=19662 working=4096 cache=3.50GB segments=6 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 13: logical_ctx=57344 phys_ctx=22939 committed=22939 working=0 cache=3.40GB segments=7 reprunes=0
+  chunk 14: logical_ctx=61440 phys_ctx=27035 committed=22939 working=4096 cache=4.00GB segments=7 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 15: logical_ctx=65536 phys_ctx=26216 committed=26216 working=0 cache=3.90GB segments=8 reprunes=0
+  chunk 16: logical_ctx=69632 phys_ctx=30312 committed=26216 working=4096 cache=4.50GB segments=8 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 17: logical_ctx=73728 phys_ctx=29493 committed=29493 working=0 cache=4.40GB segments=9 reprunes=0
+  chunk 18: logical_ctx=77824 phys_ctx=33589 committed=29493 working=4096 cache=5.00GB segments=9 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 19: logical_ctx=81920 phys_ctx=32770 committed=32770 working=0 cache=4.80GB segments=10 reprunes=0
+  chunk 20: logical_ctx=86016 phys_ctx=36866 committed=32770 working=4096 cache=5.40GB segments=10 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 21: logical_ctx=90112 phys_ctx=36047 committed=36047 working=0 cache=5.30GB segments=11 reprunes=0
+  chunk 22: logical_ctx=94208 phys_ctx=40143 committed=36047 working=4096 cache=5.90GB segments=11 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 23: logical_ctx=98304 phys_ctx=39324 committed=39324 working=0 cache=5.80GB segments=12 reprunes=0
+  chunk 24: logical_ctx=102400 phys_ctx=43420 committed=39324 working=4096 cache=6.40GB segments=12 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  chunk 25: logical_ctx=106496 phys_ctx=42601 committed=42601 working=0 cache=6.30GB segments=13 reprunes=0
+  chunk 26: logical_ctx=110592 phys_ctx=46697 committed=42601 working=4096 cache=6.90GB segments=13 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  -> OOM at peak~20.729906688
+  (prefill OOM; stopping ladder for this method)
+
+================================================================================
+SUMMARY (NIAH length ladder)
+    ctx     tok   status  peak_gb   acc
+   8000    7999       ok    14.37  1.00
+  16000   15999       ok    14.82  1.00
+  32000   31999       ok    15.74  1.00
+  64000   63999       ok    17.56  1.00
+  96000   95999       ok    19.39  1.00
+ 120000  119999      oom    20.73     -
+
+HEADLINE: max OOM-free ctx_len=96000 (tok=95999) peak=19.391024128GB acc=1.0 | first_oom=120000
+
+[recorded] detail -> results/niah/qwen3-4b_ours_per_token_cr0.4_20260527-071807.json
+[recorded] master -> results/niah_runs.jsonl

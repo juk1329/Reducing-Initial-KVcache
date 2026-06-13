@@ -1,0 +1,105 @@
+GPU total ~23.7GB | model=llama3.2-3b method=ours level=per_token comp_ratio=1.0 (final_budget=round(r*L), B_i/working_max derived) chunk=4096
+Replace llama attention with KVzip
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:00<00:00,  1.76it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00,  3.12it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00,  2.79it/s]
+
+Load meta-llama/Llama-3.2-3B-Instruct with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.11469 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+================================================================================ 
+[ctx_len=8000] building NIAH ...
+Token indices sequence length is longer than the specified maximum sequence length for this model (148770 > 131072). Running this sequence through the model will result in indexing errors
+insertion at 3965
+chunk inputs, size: 4096 (num 2)
+  chunk 0: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.50GB segments=0 reprunes=0
+  chunk 1: logical_ctx=7999 phys_ctx=7999 committed=0 working=7999 cache=0.90GB segments=0 reprunes=0
+chunk inputs, size: 4096 (num 2)
+  [done] peak_phys_ctx=7999 committed=7999 final_cache=0.90GB segments=0 reprunes=0
+  -> OK prefill_peak=11.28GB cache=0.90GB compactions=0 acc=1.00 | 'Eat a sandwich and sit in Dolores Park on a sunny day.'
+================================================================================ 
+[ctx_len=16000] building NIAH ...
+insertion at 7980
+chunk inputs, size: 4096 (num 4)
+  chunk 0: logical_ctx=4096 phys_ctx=4095 committed=0 working=4095 cache=0.50GB segments=0 reprunes=0
+  chunk 1: logical_ctx=8192 phys_ctx=8191 committed=0 working=8191 cache=0.90GB segments=0 reprunes=0
+  chunk 2: logical_ctx=12288 phys_ctx=12284 committed=0 working=12284 cache=1.40GB segments=0 reprunes=0
+  chunk 3: logical_ctx=15999 phys_ctx=15995 committed=0 working=15995 cache=1.80GB segments=0 reprunes=0
+chunk inputs, size: 4096 (num 4)
+  [done] peak_phys_ctx=15995 committed=15995 final_cache=1.80GB segments=0 reprunes=0
+  -> OK prefill_peak=12.20GB cache=1.80GB compactions=0 acc=1.00 | 'Eat a sandwich and sit in Dolores Park on a sunny day.'
+================================================================================ 
+[ctx_len=32000] building NIAH ...
+insertion at 15974
+chunk inputs, size: 4096 (num 8)
+  chunk 0: logical_ctx=4096 phys_ctx=4095 committed=0 working=4095 cache=0.50GB segments=0 reprunes=0
+  chunk 1: logical_ctx=8192 phys_ctx=8190 committed=0 working=8190 cache=0.90GB segments=0 reprunes=0
+  chunk 2: logical_ctx=12288 phys_ctx=12278 committed=0 working=12278 cache=1.40GB segments=0 reprunes=0
+  chunk 3: logical_ctx=16384 phys_ctx=16369 committed=0 working=16369 cache=1.90GB segments=0 reprunes=0
+  chunk 4: logical_ctx=20480 phys_ctx=20464 committed=0 working=20464 cache=2.40GB segments=0 reprunes=0
+  chunk 5: logical_ctx=24576 phys_ctx=24559 committed=0 working=24559 cache=2.80GB segments=0 reprunes=0
+  chunk 6: logical_ctx=28672 phys_ctx=28651 committed=0 working=28651 cache=3.30GB segments=0 reprunes=0
+  chunk 7: logical_ctx=31999 phys_ctx=31971 committed=0 working=31971 cache=3.70GB segments=0 reprunes=0
+chunk inputs, size: 4096 (num 8)
+  [done] peak_phys_ctx=31978 committed=31971 final_cache=3.70GB segments=0 reprunes=0
+  -> OK prefill_peak=14.04GB cache=3.70GB compactions=0 acc=0.00 | 'Start a startup. Get funded by Y Combinator.'
+================================================================================ 
+[ctx_len=64000] building NIAH ...
+insertion at 31978
+chunk inputs, size: 4096 (num 16)
+  chunk 0: logical_ctx=4096 phys_ctx=4095 committed=0 working=4095 cache=0.50GB segments=0 reprunes=0
+  chunk 1: logical_ctx=8192 phys_ctx=8190 committed=0 working=8190 cache=0.90GB segments=0 reprunes=0
+  chunk 2: logical_ctx=12288 phys_ctx=12278 committed=0 working=12278 cache=1.40GB segments=0 reprunes=0
+  chunk 3: logical_ctx=16384 phys_ctx=16374 committed=0 working=16374 cache=1.90GB segments=0 reprunes=0
+  chunk 4: logical_ctx=20480 phys_ctx=20470 committed=0 working=20470 cache=2.40GB segments=0 reprunes=0
+  chunk 5: logical_ctx=24576 phys_ctx=24566 committed=0 working=24566 cache=2.80GB segments=0 reprunes=0
+  chunk 6: logical_ctx=28672 phys_ctx=28660 committed=0 working=28660 cache=3.30GB segments=0 reprunes=0
+  chunk 7: logical_ctx=32768 phys_ctx=32754 committed=0 working=32754 cache=3.80GB segments=0 reprunes=0
+  chunk 8: logical_ctx=36864 phys_ctx=36848 committed=0 working=36848 cache=4.20GB segments=0 reprunes=0
+  chunk 9: logical_ctx=40960 phys_ctx=40943 committed=0 working=40943 cache=4.70GB segments=0 reprunes=0
+  chunk 10: logical_ctx=45056 phys_ctx=45039 committed=0 working=45039 cache=5.20GB segments=0 reprunes=0
+  chunk 11: logical_ctx=49152 phys_ctx=49135 committed=0 working=49135 cache=5.60GB segments=0 reprunes=0
+  chunk 12: logical_ctx=53248 phys_ctx=53227 committed=0 working=53227 cache=6.10GB segments=0 reprunes=0
+  chunk 13: logical_ctx=57344 phys_ctx=57323 committed=0 working=57323 cache=6.60GB segments=0 reprunes=0
+  chunk 14: logical_ctx=61440 phys_ctx=61418 committed=0 working=61418 cache=7.00GB segments=0 reprunes=0
+  chunk 15: logical_ctx=63999 phys_ctx=63977 committed=0 working=63977 cache=7.30GB segments=0 reprunes=0
+chunk inputs, size: 4096 (num 16)
+  [done] peak_phys_ctx=63977 committed=63977 final_cache=7.30GB segments=0 reprunes=0
+  -> OK prefill_peak=17.73GB cache=7.30GB compactions=0 acc=0.00 | 'Start a startup. Get funded by Y Combinator.'
+================================================================================ 
+[ctx_len=96000] building NIAH ...
+insertion at 47988
+chunk inputs, size: 4096 (num 24)
+  chunk 0: logical_ctx=4096 phys_ctx=4095 committed=0 working=4095 cache=0.50GB segments=0 reprunes=0
+  chunk 1: logical_ctx=8192 phys_ctx=8190 committed=0 working=8190 cache=0.90GB segments=0 reprunes=0
+  chunk 2: logical_ctx=12288 phys_ctx=12278 committed=0 working=12278 cache=1.40GB segments=0 reprunes=0
+  chunk 3: logical_ctx=16384 phys_ctx=16374 committed=0 working=16374 cache=1.90GB segments=0 reprunes=0
+  chunk 4: logical_ctx=20480 phys_ctx=20470 committed=0 working=20470 cache=2.40GB segments=0 reprunes=0
+  chunk 5: logical_ctx=24576 phys_ctx=24566 committed=0 working=24566 cache=2.80GB segments=0 reprunes=0
+  chunk 6: logical_ctx=28672 phys_ctx=28660 committed=0 working=28660 cache=3.30GB segments=0 reprunes=0
+  chunk 7: logical_ctx=32768 phys_ctx=32754 committed=0 working=32754 cache=3.80GB segments=0 reprunes=0
+  chunk 8: logical_ctx=36864 phys_ctx=36843 committed=0 working=36843 cache=4.20GB segments=0 reprunes=0
+  chunk 9: logical_ctx=40960 phys_ctx=40937 committed=0 working=40937 cache=4.70GB segments=0 reprunes=0
+  chunk 10: logical_ctx=45056 phys_ctx=45033 committed=0 working=45033 cache=5.20GB segments=0 reprunes=0
+  chunk 11: logical_ctx=49152 phys_ctx=49129 committed=0 working=49129 cache=5.60GB segments=0 reprunes=0
+  chunk 12: logical_ctx=53248 phys_ctx=53221 committed=0 working=53221 cache=6.10GB segments=0 reprunes=0
+  chunk 13: logical_ctx=57344 phys_ctx=57317 committed=0 working=57317 cache=6.60GB segments=0 reprunes=0
+  chunk 14: logical_ctx=61440 phys_ctx=61412 committed=0 working=61412 cache=7.00GB segments=0 reprunes=0
+  chunk 15: logical_ctx=65536 phys_ctx=65508 committed=0 working=65508 cache=7.50GB segments=0 reprunes=0
+  chunk 16: logical_ctx=69632 phys_ctx=69604 committed=0 working=69604 cache=8.00GB segments=0 reprunes=0
+  chunk 17: logical_ctx=73728 phys_ctx=73700 committed=0 working=73700 cache=8.50GB segments=0 reprunes=0
+  chunk 18: logical_ctx=77824 phys_ctx=77796 committed=0 working=77796 cache=8.90GB segments=0 reprunes=0
+  -> OOM at peak~19.57963776
+  (prefill OOM; stopping ladder for this method)
+
+================================================================================
+SUMMARY (NIAH length ladder)
+    ctx     tok   status  peak_gb   acc
+   8000    7999       ok    11.28  1.00
+  16000   15999       ok    12.20  1.00
+  32000   31999       ok    14.04  0.00
+  64000   63999       ok    17.73  0.00
+  96000   95999      oom    19.58     -
+
+HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=17.730428416GB acc=0.0 | first_oom=96000
+
+[recorded] detail -> results/niah/llama3.2-3b_ours_per_token_cr1.0_20260527-090623.json
+[recorded] master -> results/niah_runs.jsonl

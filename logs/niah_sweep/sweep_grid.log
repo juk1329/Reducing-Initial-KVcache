@@ -1,0 +1,50 @@
+==== GRID START Wed May 27 06:26:06 UTC 2026 ====
+==== START qwen3-4b ours cr=0.0 Wed May 27 06:26:06 UTC 2026 ====
+[qwen3-4b/ours cr=0.0] HEADLINE: max OOM-free ctx_len=120000 (tok=119999) peak=15.07048192GB acc=0.0 | first_oom=None
+==== START qwen3-4b kvzip cr=0.0 Wed May 27 06:39:37 UTC 2026 ====
+[qwen3-4b/kvzip cr=0.0] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=18.962442752GB acc=0.0 | first_oom=96000
+==== START qwen3-4b ours cr=0.2 Wed May 27 06:44:11 UTC 2026 ====
+[qwen3-4b/ours cr=0.2] HEADLINE: max OOM-free ctx_len=120000 (tok=119999) peak=17.576143872GB acc=0.5 | first_oom=None
+==== START qwen3-4b kvzip cr=0.2 Wed May 27 06:58:22 UTC 2026 ====
+[qwen3-4b/kvzip cr=0.2] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=18.962442752GB acc=1.0 | first_oom=96000
+==== START qwen3-4b ours cr=0.4 Wed May 27 07:02:50 UTC 2026 ====
+[qwen3-4b/ours cr=0.4] HEADLINE: max OOM-free ctx_len=96000 (tok=95999) peak=19.391024128GB acc=1.0 | first_oom=120000
+==== START qwen3-4b kvzip cr=0.4 Wed May 27 07:18:08 UTC 2026 ====
+[qwen3-4b/kvzip cr=0.4] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=18.962442752GB acc=1.0 | first_oom=96000
+==== START qwen3-4b ours cr=0.6 Wed May 27 07:22:38 UTC 2026 ====
+[qwen3-4b/ours cr=0.6] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=19.261248512GB acc=1.0 | first_oom=96000
+==== START qwen3-4b kvzip cr=0.6 Wed May 27 07:31:53 UTC 2026 ====
+[qwen3-4b/kvzip cr=0.6] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=18.962442752GB acc=1.0 | first_oom=96000
+==== START qwen3-4b ours cr=0.8 Wed May 27 07:36:25 UTC 2026 ====
+[qwen3-4b/ours cr=0.8] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=20.958984192GB acc=1.0 | first_oom=96000
+==== START qwen3-4b kvzip cr=0.8 Wed May 27 07:45:06 UTC 2026 ====
+[qwen3-4b/kvzip cr=0.8] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=18.962442752GB acc=1.0 | first_oom=96000
+==== START qwen3-4b ours cr=1.0 Wed May 27 07:49:37 UTC 2026 ====
+[qwen3-4b/ours cr=1.0] HEADLINE: max OOM-free ctx_len=32000 (tok=31999) peak=17.94400256GB acc=1.0 | first_oom=64000
+==== START qwen3-4b kvzip cr=1.0 Wed May 27 07:53:44 UTC 2026 ====
+[qwen3-4b/kvzip cr=1.0] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=18.962442752GB acc=1.0 | first_oom=96000
+==== START llama3.2-3b ours cr=0.0 Wed May 27 07:58:17 UTC 2026 ====
+[llama3.2-3b/ours cr=0.0] HEADLINE: max OOM-free ctx_len=120000 (tok=119999) peak=11.813664768GB acc=0.0 | first_oom=None
+==== START llama3.2-3b kvzip cr=0.0 Wed May 27 08:07:02 UTC 2026 ====
+[llama3.2-3b/kvzip cr=0.0] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=14.906808832GB acc=0.0 | first_oom=96000
+==== START llama3.2-3b ours cr=0.2 Wed May 27 08:10:38 UTC 2026 ====
+[llama3.2-3b/ours cr=0.2] HEADLINE: max OOM-free ctx_len=120000 (tok=119999) peak=13.665633792GB acc=0.0 | first_oom=None
+==== START llama3.2-3b kvzip cr=0.2 Wed May 27 08:19:48 UTC 2026 ====
+[llama3.2-3b/kvzip cr=0.2] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=14.906808832GB acc=0.0 | first_oom=96000
+==== START llama3.2-3b ours cr=0.4 Wed May 27 08:23:11 UTC 2026 ====
+[llama3.2-3b/ours cr=0.4] HEADLINE: max OOM-free ctx_len=120000 (tok=119999) peak=15.082214912GB acc=0.0 | first_oom=None
+==== START llama3.2-3b kvzip cr=0.4 Wed May 27 08:32:23 UTC 2026 ====
+[llama3.2-3b/kvzip cr=0.4] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=14.906808832GB acc=0.0 | first_oom=96000
+==== START llama3.2-3b ours cr=0.6 Wed May 27 08:35:13 UTC 2026 ====
+[llama3.2-3b/ours cr=0.6] HEADLINE: max OOM-free ctx_len=120000 (tok=119999) peak=17.182305792GB acc=0.0 | first_oom=None
+==== START llama3.2-3b kvzip cr=0.6 Wed May 27 08:44:57 UTC 2026 ====
+[llama3.2-3b/kvzip cr=0.6] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=14.906808832GB acc=0.0 | first_oom=96000
+==== START llama3.2-3b ours cr=0.8 Wed May 27 08:47:51 UTC 2026 ====
+[llama3.2-3b/ours cr=0.8] HEADLINE: max OOM-free ctx_len=96000 (tok=95999) peak=17.345964544GB acc=0.0 | first_oom=120000
+==== START llama3.2-3b kvzip cr=0.8 Wed May 27 08:58:02 UTC 2026 ====
+[llama3.2-3b/kvzip cr=0.8] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=14.906808832GB acc=0.0 | first_oom=96000
+==== START llama3.2-3b ours cr=1.0 Wed May 27 09:00:53 UTC 2026 ====
+[llama3.2-3b/ours cr=1.0] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=17.730428416GB acc=0.0 | first_oom=96000
+==== START llama3.2-3b kvzip cr=1.0 Wed May 27 09:06:24 UTC 2026 ====
+[llama3.2-3b/kvzip cr=1.0] HEADLINE: max OOM-free ctx_len=64000 (tok=63999) peak=14.906808832GB acc=0.0 | first_oom=96000
+==== GRID COMPLETE Wed May 27 09:09:16 UTC 2026 ====

@@ -1,0 +1,143 @@
+### B-ours START Thu May 28 14:39:52 UTC 2026
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.27it/s]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.30it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.40it/s]
+
+GPU total ~23.7GB | model=qwen3-4b data=scbench_kv_short method=ours comp_ratio=1.0 turn_budget=2048
+Replace qwen3 attention with KVzip
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+
+scbench_kv_short loaded, #data: 100
+context tokens=24470 | #questions=10 | turns=150 | B_f=24470 B_turn=2447 (ours) | kvzip ratio=1.0
+chunk inputs, size: 2048 (num 12)
+  chunk 0: logical_ctx=2048 phys_ctx=2048 committed=0 working=2048 cache=0.30GB segments=0 reprunes=0
+  chunk 1: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.60GB segments=0 reprunes=0
+  chunk 2: logical_ctx=6144 phys_ctx=6144 committed=0 working=6144 cache=0.90GB segments=0 reprunes=0
+  chunk 3: logical_ctx=8192 phys_ctx=8192 committed=0 working=8192 cache=1.20GB segments=0 reprunes=0
+  chunk 4: logical_ctx=10240 phys_ctx=10240 committed=0 working=10240 cache=1.50GB segments=0 reprunes=0
+  chunk 5: logical_ctx=12288 phys_ctx=12288 committed=0 working=12288 cache=1.80GB segments=0 reprunes=0
+  chunk 6: logical_ctx=14336 phys_ctx=14336 committed=0 working=14336 cache=2.10GB segments=0 reprunes=0
+  chunk 7: logical_ctx=16384 phys_ctx=16384 committed=0 working=16384 cache=2.40GB segments=0 reprunes=0
+  chunk 8: logical_ctx=18432 phys_ctx=18432 committed=0 working=18432 cache=2.70GB segments=0 reprunes=0
+  chunk 9: logical_ctx=20480 phys_ctx=20480 committed=0 working=20480 cache=3.00GB segments=0 reprunes=0
+  chunk 10: logical_ctx=22528 phys_ctx=22528 committed=0 working=22528 cache=3.30GB segments=0 reprunes=0
+  chunk 11: logical_ctx=24470 phys_ctx=24470 committed=0 working=24470 cache=3.60GB segments=0 reprunes=0
+chunk inputs, size: 2048 (num 12)
+  [done] peak_phys_ctx=24470 committed=24470 final_cache=3.60GB segments=0 reprunes=0
+context prefilled: peak=13.17GB cache=3.60GB
+  turn 0: cache=3.60GB phys=24625 ctx_turns=127/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 10: cache=3.80GB phys=25925 ctx_turns=1427/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 20: cache=4.00GB phys=27225 ctx_turns=2727/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 30: cache=4.20GB phys=28525 ctx_turns=4027/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 40: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=10 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 50: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=20 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 60: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=30 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 70: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=40 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 80: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=50 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 90: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=60 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 100: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=70 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 110: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=80 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 120: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=90 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 130: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=100 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 140: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=110 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 149: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=119 acc=1.00 | 'The key associated with the value "96945afe-fded-4'
+
+================================================================================
+SUMMARY: method=ours survived_turns=150/150 stop=completed max_tokens=44044 mean_acc=1.000 final_cache=4.20GB peak_during_turns=12.50GB
+
+[recorded] detail -> results/scbench/qwen3-4b_ours_per_token_scbench_kv_short_expB_20260528-150028.json
+[recorded] master -> results/scbench_runs.jsonl
+
+### B-combine START Thu May 28 15:00:29 UTC 2026
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.31it/s]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.34it/s]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.46it/s]
+
+GPU total ~23.7GB | model=qwen3-4b data=scbench_kv_short method=ours_combine comp_ratio=1.0 turn_budget=2048
+Replace qwen3 attention with KVzip
+
+Load Qwen/Qwen3-4B with torch.bfloat16
+KV type: evict
+env: NVIDIA L4 23.659GB | KV 0.14746 GB/1k tok | torch 2.6.0+cu124 tf 4.51.3 fa 2.7.4.post1
+
+scbench_kv_short loaded, #data: 100
+context tokens=24470 | #questions=10 | turns=150 | B_f=24470 B_turn=2447 (ours) | kvzip ratio=1.0
+chunk inputs, size: 2048 (num 12)
+  chunk 0: logical_ctx=2048 phys_ctx=2048 committed=0 working=2048 cache=0.30GB segments=0 reprunes=0
+  chunk 1: logical_ctx=4096 phys_ctx=4096 committed=0 working=4096 cache=0.60GB segments=0 reprunes=0
+  chunk 2: logical_ctx=6144 phys_ctx=6144 committed=0 working=6144 cache=0.90GB segments=0 reprunes=0
+  chunk 3: logical_ctx=8192 phys_ctx=8192 committed=0 working=8192 cache=1.20GB segments=0 reprunes=0
+  chunk 4: logical_ctx=10240 phys_ctx=10240 committed=0 working=10240 cache=1.50GB segments=0 reprunes=0
+  chunk 5: logical_ctx=12288 phys_ctx=12288 committed=0 working=12288 cache=1.80GB segments=0 reprunes=0
+  chunk 6: logical_ctx=14336 phys_ctx=14336 committed=0 working=14336 cache=2.10GB segments=0 reprunes=0
+  chunk 7: logical_ctx=16384 phys_ctx=16384 committed=0 working=16384 cache=2.40GB segments=0 reprunes=0
+  chunk 8: logical_ctx=18432 phys_ctx=18432 committed=0 working=18432 cache=2.70GB segments=0 reprunes=0
+  chunk 9: logical_ctx=20480 phys_ctx=20480 committed=0 working=20480 cache=3.00GB segments=0 reprunes=0
+  chunk 10: logical_ctx=22528 phys_ctx=22528 committed=0 working=22528 cache=3.30GB segments=0 reprunes=0
+  chunk 11: logical_ctx=24470 phys_ctx=24470 committed=0 working=24470 cache=3.60GB segments=0 reprunes=0
+chunk inputs, size: 2048 (num 12)
+chunk inputs, size: 2048 (num 12)
+chunk inputs, size: 2048 (num 12)
+  [done] peak_phys_ctx=24470 committed=24470 final_cache=3.60GB segments=0 reprunes=0
+context prefilled: peak=13.17GB cache=3.60GB
+  turn 0: cache=3.60GB phys=24625 ctx_turns=127/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 10: cache=3.80GB phys=25925 ctx_turns=1427/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 20: cache=4.00GB phys=27225 ctx_turns=2727/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+  turn 30: cache=4.20GB phys=28525 ctx_turns=4027/cap4096 reprunes=0 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 40: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=10 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 50: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=20 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 60: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=30 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 70: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=40 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 80: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=50 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 90: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=60 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 100: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=70 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 110: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=80 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+chunk inputs, size: 2048 (num 3)
+  turn 120: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=90 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 130: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=100 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 140: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=110 acc=1.00 | 'The value associated with the key "6ab6ea3e-f288-4'
+chunk inputs, size: 2048 (num 3)
+  turn 149: cache=4.20GB phys=28594 ctx_turns=4096/cap4096 reprunes=119 acc=1.00 | 'The key associated with the value "96945afe-fded-4'
+
+================================================================================
+SUMMARY: method=ours_combine survived_turns=150/150 stop=completed max_tokens=44044 mean_acc=1.000 final_cache=4.20GB peak_during_turns=12.50GB
+
+[recorded] detail -> results/scbench/qwen3-4b_ours_per_token_scbench_kv_short_expB_20260528-152236.json
+[recorded] master -> results/scbench_runs.jsonl
+
+### B DONE Thu May 28 15:22:37 UTC 2026
