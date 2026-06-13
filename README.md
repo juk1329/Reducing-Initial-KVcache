@@ -222,33 +222,7 @@ paper §4.1의 "Memory protocol" 단락과 동기.
 
 ---
 
-## 9. 결과가 어디에 있는가
-
-| 종류 | 위치 |
-|---|---|
-| 전체 한국어 분석 / staging notes | `RESULTS_NOTES.md` |
-| NIAH 셀별 JSON | `results/niah_grid/*.json` |
-| NIAH 표 (paper) | `results/summary_niah_grid.md`, `.csv` |
-| SCBench 실행별 JSON (턴별 trace 포함) | `results/scbench/*.json` |
-| SCBench 표 (paper) | `results/summary_scbench.md`, `.csv` |
-| 단일 NIAH ladder 결과 | `results/niah/*.json`, `results/summary_niah.md` (preliminary long-context evidence) |
-
----
-
-## 10. 알려진 한계 / 향후 과제
-
-`paper.tex` Conclusion과 동기:
-
-1. **per_token whole-position drop이 incompressible context에 부적합.** scbench_kv (random UUID)에서는 per_token으로 압축하면 정답이 사라진다. KVzip의 per_head는 각 position을 일부 head라도 보존하므로 살아남는다. 본 실험은 워크어라운드로 kv 태스크의 context는 `--comp_ratio 1.0`(full)로 두고 turn만 압축. **하이브리드 cache**(per-head context + dense turns) 가 future work — varlen에서 fresh chunk를 dense로 추출해 점수화하는 커널이 필요.
-2. **r=0.2 + 8k tokens 극단 압축에서 NIAH 정확도 dip.** ours 0.73 vs KVzip 1.00 (Qwen3-4B). streaming은 이미 drop한 mid-context needle을 다시 복구할 수 없음 — 본 트레이드오프는 본 방법 고유의 한계로 paper에 솔직히 명시.
-3. **장문 context systematic 평가 부족.** 본 grid는 8k까지. 메모리 노트의 preliminary ladder (Qwen3-4B per_token: ours는 120k까지 budget 내, KVzip은 96k에서 OOM)는 추세는 보여주지만 per-head 그리드와는 일치하지 않음. **16k–128k systematic eval**이 가장 즉시 다음 단계.
-4. **벤치마크 다양성.** NIAH (single needle) + SCBench summary/kv 두 task만 검증됨. multi-needle / LongBench / multi-document QA / multi-query 까지 확장이 paper의 "query-robust" claim을 더 강하게 만든다.
-5. **per_head + multi-turn.** 현재 SCBench는 per_token 강제 (varlen cache는 dense turn append와 호환 X). 위 1번과 함께 future work.
-6. **prune 순간 transient spike.** `torch.cat`으로 새 텐서 생성 → 일시적으로 old+new 공존. 모든 transient는 budget 안이지만 `index_select` in-place로 최적화 여지.
-
----
-
-## 11. Citing
+## 9. Citing
 
 본 레포의 baseline 및 기반:
 - **KVzip** (Kim et al. 2026) — reconstruction-based importance + per-head varlen prune. `kim2026kvzip`.
